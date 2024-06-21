@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/sujal/Documents/project/CodeEditor/build",
+  "command": "/usr/bin/c++ -DWXUSINGDLL -D_FILE_OFFSET_BITS=64 -D__WXGTK__ -DwxUSE_STC=1 -isystem /usr/local/lib/wx/include/gtk3-unicode-3.2 -isystem /usr/local/include/wx-3.2  -pthread -g -std=gnu++11 -o CMakeFiles/CodeEditor.dir/gui.cpp.o -c /home/sujal/Documents/project/CodeEditor/gui.cpp",
+  "file": "/home/sujal/Documents/project/CodeEditor/gui.cpp",
+  "output": "CMakeFiles/CodeEditor.dir/gui.cpp.o"
+},
+{
+  "directory": "/home/sujal/Documents/project/CodeEditor/build",
+  "command": "/usr/bin/c++ -DWXUSINGDLL -D_FILE_OFFSET_BITS=64 -D__WXGTK__ -DwxUSE_STC=1 -isystem /usr/local/lib/wx/include/gtk3-unicode-3.2 -isystem /usr/local/include/wx-3.2  -pthread -g -std=gnu++11 -o CMakeFiles/CodeEditor.dir/editor.cpp.o -c /home/sujal/Documents/project/CodeEditor/editor.cpp",
+  "file": "/home/sujal/Documents/project/CodeEditor/editor.cpp",
+  "output": "CMakeFiles/CodeEditor.dir/editor.cpp.o"
+}
+]

@@ -1,5 +1,5 @@
 # Ignore build artifacts
-/build/
+/build/*
 /bin/
 /out/
 
@@ -12,7 +12,7 @@
 *.zip
 
 # Ignore IDE-specific files 
-.vscode/
+.vscode/*
 
 
 

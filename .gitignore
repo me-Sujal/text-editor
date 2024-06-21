@@ -1,0 +1,38 @@
+# Ignore build artifacts
+/build/
+/bin/
+/out/
+
+# Ignore compiled binaries
+*.exe
+*.out
+*.so
+*.dll
+
+# Ignore logs and other generated files
+*.log
+*.tar.gz
+*.zip
+
+# Ignore IDE-specific files (uncomment as needed)
+# .vscode/
+# .idea/
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore Visual Studio files
+*.suo
+*.user
+*.sln.docstates
+
+# Ignore CMake generated files
+/CMakeFiles/
+/CMakeCache.txt
+/CMakeScripts/
+/CMakeScripts/
+/CMakeScripts/
+
+# Ignore clang tooling
+/.clang/
+

@@ -3,4 +3,4 @@
 -[X] line numbering
 -[] file handlings
 -[] tree like sturcture for directory 
--[] multiple tabs
+-[] multiple tabs feature

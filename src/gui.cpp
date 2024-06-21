@@ -18,7 +18,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, 
 
     m_Editor = new Editor(this);
 
-    // Set up the main sizer to add other sizer decalre and append here
+    // Set up the main sizer to add other sizer if decalre  append in main sizer
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(m_Editor, 1, wxEXPAND);
     SetSizer(mainSizer);

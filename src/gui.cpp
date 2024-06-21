@@ -18,7 +18,7 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, 
 
     m_Editor = new Editor(this);
 
-    // Set up the main sizer
+    // Set up the main sizer to add other sizer decalre and append here
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(m_Editor, 1, wxEXPAND);
     SetSizer(mainSizer);
@@ -62,6 +62,7 @@ void MyFrame::CreateMenuBar()
 
 void MyFrame::BindEventHandlers()
 {
+    // All the Event Handlers goes here 
     // // File menu
     // Bind(wxEVT_MENU, &MyFrame::OnNewFile, this, ID_NewFile);
     // Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
@@ -83,4 +84,3 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
 }
 
-// Implement the event handlers (OnNewFile, OnOpenFile, etc.) here...

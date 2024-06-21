@@ -2,7 +2,7 @@
 
 #include <wx/wx.h>
 
-class Editor; // Forward declaration
+class Editor; 
 
 class MyApp : public wxApp
 {
@@ -40,23 +40,24 @@ private:
     void OnDocumentation(wxCommandEvent &event);
     void OnAbout(wxCommandEvent &event);
 
-    Editor *m_Editor;
+    // Editor Declaration
+    Editor *m_Editor; 
 };
 
 // Menu item IDs
 enum
 {
-    ID_NewFile = wxID_HIGHEST + 1,
-    ID_NewWindow,
-    ID_OpenFile,
-    ID_OpenFolder,
-    ID_Save,
-    ID_SaveAs,
-    ID_SaveAll,
-    ID_Cut,
-    ID_Copy,
-    ID_Paste,
-    ID_Wrap,
-    ID_Documentation,
-    ID_About
+    ID_NewFile = 1,
+    ID_NewWindow =2 ,
+    ID_OpenFile = 3,
+    ID_OpenFolder =4 ,
+    ID_Save = 5,
+    ID_SaveAs = 6 ,
+    ID_SaveAll = 7 ,
+    ID_Cut =  8,
+    ID_Copy = 9,
+    ID_Paste = 10,
+    ID_Wrap = 11,
+    ID_Documentation = 12,
+    ID_About =13 
 };

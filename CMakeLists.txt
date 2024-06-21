@@ -13,8 +13,8 @@ add_definitions(-DwxUSE_STC=1)
 
 # Add your source files
 set(SOURCE_FILES 
-    gui.cpp
-    editor.cpp
+    src/gui.cpp
+    src/editor.cpp
     # Add other .cpp files if you have any
 )
 

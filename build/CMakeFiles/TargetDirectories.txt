@@ -1,3 +1,0 @@
-/home/sujal/Documents/project/CodeEditor/build/CMakeFiles/CodeEditor.dir
-/home/sujal/Documents/project/CodeEditor/build/CMakeFiles/edit_cache.dir
-/home/sujal/Documents/project/CodeEditor/build/CMakeFiles/rebuild_cache.dir

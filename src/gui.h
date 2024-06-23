@@ -2,7 +2,7 @@
 
 #include <wx/wx.h>
 
-class Editor; 
+class Editor;
 
 class MyApp : public wxApp
 {
@@ -41,23 +41,23 @@ private:
     void OnAbout(wxCommandEvent &event);
 
     // Editor Declaration
-    Editor *m_Editor; 
+    Editor *m_Editor;
 };
 
 // Menu item IDs
 enum
 {
     ID_NewFile = 1,
-    ID_NewWindow =2 ,
+    ID_NewWindow = 2,
     ID_OpenFile = 3,
-    ID_OpenFolder =4 ,
+    ID_OpenFolder = 4,
     ID_Save = 5,
-    ID_SaveAs = 6 ,
-    ID_SaveAll = 7 ,
-    ID_Cut =  8,
+    ID_SaveAs = 6,
+    ID_SaveAll = 7,
+    ID_Cut = 8,
     ID_Copy = 9,
     ID_Paste = 10,
     ID_Wrap = 11,
     ID_Documentation = 12,
-    ID_About =13 
+    ID_About = 13
 };

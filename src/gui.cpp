@@ -1,6 +1,7 @@
 #include "gui.h"
 #include "editor.h"
 #include <wx/wx.h>
+#include <wx/file.h>
 
 wxIMPLEMENT_APP(MyApp);
 
@@ -11,7 +12,7 @@ bool MyApp::OnInit()
     return true;
 }
 
-MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800,500))
+MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
 {
     CreateMenuBar();
     BindEventHandlers();
@@ -22,6 +23,8 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(m_Editor, 1, wxEXPAND);
     SetSizer(mainSizer);
+
+    Centre();
 }
 
 void MyFrame::CreateMenuBar()
@@ -33,7 +36,7 @@ void MyFrame::CreateMenuBar()
     fileMenu->Append(ID_NewFile, "&New File\tCtrl+N");
     fileMenu->Append(ID_NewWindow, "New &Window\tCtrl+Shift+N");
     fileMenu->Append(ID_OpenFile, "&Open File...\tCtrl+O");
-    fileMenu->Append(ID_OpenFolder, "Open F&older...\tCtrl+K Ctrl+O");
+    fileMenu->Append(ID_OpenFolder, "Open F&older...\tCtrl+Shift+O");
     fileMenu->AppendSeparator();
     fileMenu->Append(ID_Save, "&Save\tCtrl+S");
     fileMenu->Append(ID_SaveAs, "Save &As...\tCtrl+Shift+S");
@@ -62,11 +65,11 @@ void MyFrame::CreateMenuBar()
 
 void MyFrame::BindEventHandlers()
 {
-    // All the Event Handlers goes here 
+    // All the Event Handlers goes here
     // // File menu
     // Bind(wxEVT_MENU, &MyFrame::OnNewFile, this, ID_NewFile);
-    // Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
-    // Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
+    Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
+    Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
     // Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
     // Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
     // Bind(wxEVT_MENU, &MyFrame::OnSaveAs, this, ID_SaveAs);
@@ -84,3 +87,29 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
 }
 
+void MyFrame::OnNewWindow(wxCommandEvent &event) {
+    MyFrame *newFrame = new MyFrame();
+    newFrame->Show(true);
+}
+
+void MyFrame::OnOpenFile(wxCommandEvent &event)
+{
+    wxFileDialog openFileDialog(this, "Open File", "", "", "All Files(*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    if (openFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    wxString filePath = openFileDialog.GetPath();
+    wxFile file(filePath);
+
+    if (!file.IsOpened())
+    {
+        wxMessageBox("Oops! Cannot Open file ' " + filePath + "'.", "Error", wxOK | wxICON_ERROR);
+        return;
+    }
+
+    wxString content;
+    file.ReadAll(&content);
+    file.Close();
+
+    m_Editor->SetText(content);
+}

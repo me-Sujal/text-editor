@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wx/wx.h>
+#include <wx/stc/stc.h>
 
 class Editor;
 
@@ -13,7 +14,7 @@ public:
 class MyFrame : public wxFrame
 {
 public:
-    MyFrame();
+    MyFrame(const wxString &filepath, const wxString &initialContent);
 
 private:
     void CreateMenuBar();
@@ -40,8 +41,13 @@ private:
     void OnDocumentation(wxCommandEvent &event);
     void OnAbout(wxCommandEvent &event);
 
+    // For dynamics title
+    void UpdateTitle();
+
     // Editor Declaration
     Editor *m_Editor;
+
+    wxString m_currentFile;
 };
 
 // Menu item IDs

@@ -2,17 +2,19 @@
 #include "editor.h"
 #include <wx/wx.h>
 #include <wx/file.h>
+#include <wx/filename.h>
 
 wxIMPLEMENT_APP(MyApp);
 
 bool MyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame();
+    MyFrame *frame = new MyFrame(wxEmptyString, wxEmptyString);
     frame->Show();
     return true;
 }
 
-MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
+MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
+    : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
 {
     CreateMenuBar();
     BindEventHandlers();
@@ -25,6 +27,8 @@ MyFrame::MyFrame() : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, 
     SetSizer(mainSizer);
 
     Centre();
+
+     m_currentFile = filepath;
 }
 
 void MyFrame::CreateMenuBar()
@@ -87,8 +91,13 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
 }
 
+void MyFrame::UpdateTitle(){
+    wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
+    SetTitle(title + " - CodeLite");
+}
+
 void MyFrame::OnNewWindow(wxCommandEvent &event) {
-    MyFrame *newFrame = new MyFrame();
+    MyFrame *newFrame = new MyFrame(wxEmptyString,wxEmptyString);
     newFrame->Show(true);
 }
 
@@ -112,4 +121,6 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
     file.Close();
 
     m_Editor->SetText(content);
+    m_currentFile = filePath;
+    UpdateTitle();
 }

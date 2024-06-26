@@ -1,3 +1,4 @@
+//hi 
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
 #include "editor.h"

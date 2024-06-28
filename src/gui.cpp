@@ -77,17 +77,62 @@ void MyFrame::CreateLayout()
 
     m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
 
-    m_Editor = new Editor(m_splitter);
+    // m_Editor = new Editor(m_splitter);
+    m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS);
 
-    m_splitter->SplitVertically(m_treeCtrl, m_Editor);
+    m_splitter->SplitVertically(m_treeCtrl, m_notebook);
     m_splitter->SetMinimumPaneSize(100);
     m_splitter->SetSashPosition(200);
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(m_splitter, 1, wxEXPAND);
     SetSizer(mainSizer);
+
+    CreateTab();
 }
 
+void MyFrame::CreateTab(const wxString &filename)
+{
+
+    wxString title = filename.IsEmpty() ? "Untitled" : wxFileName(filename).GetFullName();
+
+    if (!filename.IsEmpty())
+    {
+        m_Editor = new Editor(m_notebook);
+        m_editors.push_back(m_Editor);
+        m_notebook->AddPage(m_Editor, title, true);
+
+        if (!filename.IsEmpty())
+        {
+            wxFile file(filename);
+            if (file.IsOpened())
+            {
+                wxString content;
+                if (file.ReadAll(&content))
+                {
+
+                    m_Editor->SetText(content);
+                }
+            }
+        }
+    }
+}
+
+void MyFrame::CloseTab(size_t index)
+{
+    if (index < m_editors.size())
+    {
+        delete m_editors[index];
+        m_editors.erase(m_editors.begin() + index);
+        m_notebook->DeletePage(index);
+    }
+}
+
+void MyFrame::onTabClose(wxAuiNotebookEvent &event)
+{
+    int index = event.GetSelection();
+    CloseTab(index);
+}
 void MyFrame::BindEventHandlers()
 {
 
@@ -113,6 +158,8 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
 
     m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &MyFrame::OnTreeItemActivated, this);
+
+    m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &MyFrame::onTabClose, this);
 }
 
 void MyFrame::OnOpenFolder(wxCommandEvent &event)
@@ -163,20 +210,36 @@ void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
     wxTreeItemId itemId = event.GetItem();
     wxString path = GetItemPath(itemId);
 
-    if (wxDir::Exists(path))
+    // if (wxDir::Exists(path))
+    // {
+    //     m_treeCtrl->Toggle(itemId);
+    // }
+    // else
+    // {
+    //     wxFile file(path);
+    //     if (file.IsOpened())
+    //     {
+    //         wxString content;
+    //         file.ReadAll(&content);
+    //         m_Editor->SetText(content);
+    //         m_currentFile = path;
+    //         UpdateTitle();
+    //     }
+    // }
+
+    if (wxFile::Exists(path))
     {
-        m_treeCtrl->Toggle(itemId);
+        CreateTab(path);
     }
-    else
+    else if (wxDir::Exists(path))
     {
-        wxFile file(path);
-        if (file.IsOpened())
+        if (m_treeCtrl->IsExpanded(itemId))
         {
-            wxString content;
-            file.ReadAll(&content);
-            m_Editor->SetText(content);
-            m_currentFile = path;
-            UpdateTitle();
+            m_treeCtrl->Collapse(itemId);
+        }
+        else
+        {
+            m_treeCtrl->Expand(itemId);
         }
     }
 }
@@ -198,6 +261,13 @@ void MyFrame::UpdateTitle()
 {
     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
     SetTitle(title + " - CodeLite");
+
+    // int currentPage = m_notebook->GetSelection();
+    // if (currentPage != wxNOT_FOUND)
+    // {
+    //     wxString title = m_notebook->GetPageText(currentPage);
+    //     // SetTitle(title + " - CodeLite ");
+    // }
 }
 
 void MyFrame::OnNewWindow(wxCommandEvent &event)
@@ -213,19 +283,21 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
         return;
 
     wxString filePath = openFileDialog.GetPath();
-    wxFile file(filePath);
 
-    if (!file.IsOpened())
-    {
-        wxMessageBox("Oops! Cannot Open file ' " + filePath + "'.", "Error", wxOK | wxICON_ERROR);
-        return;
-    }
+    CreateTab(filePath);
+    // wxFile file(filePath);
 
-    wxString content;
-    file.ReadAll(&content);
-    file.Close();
+    // if (!file.IsOpened())
+    // {
+    //     wxMessageBox("Oops! Cannot Open file ' " + filePath + "'.", "Error", wxOK | wxICON_ERROR);
+    //     return;
+    // }
 
-    m_Editor->SetText(content);
-    m_currentFile = filePath;
-    UpdateTitle();
+    // wxString content;
+    // file.ReadAll(&content);
+    // file.Close();
+
+    // m_Editor->SetText(content);
+    // m_currentFile = filePath;
+    // UpdateTitle();
 }

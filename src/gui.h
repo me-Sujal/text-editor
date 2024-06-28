@@ -4,6 +4,7 @@
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
 #include <wx/treectrl.h>
+#include <wx/aui/auibook.h>
 
 class Editor;
 
@@ -43,6 +44,13 @@ private:
     // Help menu event handlers
     void OnDocumentation(wxCommandEvent &event);
     void OnAbout(wxCommandEvent &event);
+
+    wxAuiNotebook *m_notebook;
+    std::vector<Editor*>m_editors;
+
+    void CreateTab(const wxString& filename = wxEmptyString);
+    void CloseTab(size_t index);
+    void onTabClose(wxAuiNotebookEvent &event);
 
     // For dynamics title
     void UpdateTitle();

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <wx/wx.h>
+#include <wx/splitter.h>
 #include <wx/stc/stc.h>
+#include <wx/treectrl.h>
 
 class Editor;
 
@@ -18,6 +20,7 @@ public:
 
 private:
     void CreateMenuBar();
+    void CreateLayout();
     void BindEventHandlers();
 
     // File menu event handlers
@@ -44,9 +47,17 @@ private:
     // For dynamics title
     void UpdateTitle();
 
+    void PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId);
+    void OnTreeItemActivated(wxTreeEvent &event);
+    wxString GetItemPath(wxTreeItemId itemId);
+
+    wxTreeCtrl *m_treeCtrl;
+    wxSplitterWindow *m_splitter;
+
     // Editor Declaration
     Editor *m_Editor;
 
+    wxString m_rootPath;
     wxString m_currentFile;
 };
 

@@ -3,6 +3,9 @@
 #include <wx/wx.h>
 #include <wx/file.h>
 #include <wx/filename.h>
+#include <wx/dir.h>
+
+#include <iostream>
 
 wxIMPLEMENT_APP(MyApp);
 
@@ -16,19 +19,20 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
 {
+    CreateLayout();
     CreateMenuBar();
     BindEventHandlers();
 
-    m_Editor = new Editor(this);
+    // m_Editor = new Editor(this);
 
     // Set up the main sizer to add other sizer if decalre  append in main sizer
-    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(m_Editor, 1, wxEXPAND);
-    SetSizer(mainSizer);
+    // wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
+    // mainSizer->Add(m_Editor, 1, wxEXPAND);
+    // SetSizer(mainSizer);
 
     Centre();
 
-     m_currentFile = filepath;
+    m_currentFile = filepath;
 }
 
 void MyFrame::CreateMenuBar()
@@ -67,14 +71,32 @@ void MyFrame::CreateMenuBar()
     SetMenuBar(menuBar);
 }
 
+void MyFrame::CreateLayout()
+{
+    m_splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
+
+    m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
+
+    m_Editor = new Editor(m_splitter);
+
+    m_splitter->SplitVertically(m_treeCtrl, m_Editor);
+    m_splitter->SetMinimumPaneSize(100);
+    m_splitter->SetSashPosition(200);
+
+    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(m_splitter, 1, wxEXPAND);
+    SetSizer(mainSizer);
+}
+
 void MyFrame::BindEventHandlers()
 {
+
     // All the Event Handlers goes here
     // // File menu
     // Bind(wxEVT_MENU, &MyFrame::OnNewFile, this, ID_NewFile);
     Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
-    // Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
+    Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
     // Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
     // Bind(wxEVT_MENU, &MyFrame::OnSaveAs, this, ID_SaveAs);
     // Bind(wxEVT_MENU, &MyFrame::OnSaveAll, this, ID_SaveAll);
@@ -89,15 +111,98 @@ void MyFrame::BindEventHandlers()
     // // Help menu
     // Bind(wxEVT_MENU, &MyFrame::OnDocumentation, this, ID_Documentation);
     // Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
+
+    m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &MyFrame::OnTreeItemActivated, this);
 }
 
-void MyFrame::UpdateTitle(){
+void MyFrame::OnOpenFolder(wxCommandEvent &event)
+{
+    wxDirDialog dlg(nullptr, "Choose Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+    if (dlg.ShowModal() == wxID_CANCEL)
+    {
+        return;
+    }
+
+    m_rootPath = dlg.GetPath();
+    m_treeCtrl->DeleteAllItems();
+    wxTreeItemId rootId = m_treeCtrl->AddRoot(m_rootPath);
+    PopulateTreeWithDirs(m_rootPath, rootId);
+    m_treeCtrl->Expand(rootId);
+}
+
+void MyFrame::PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId)
+{
+    wxDir dir(path);
+    if (!dir.IsOpened())
+    {
+        return;
+    }
+
+    wxString filename;
+    bool cont = dir.GetFirst(&filename, wxEmptyString, wxDIR_FILES | wxDIR_DIRS);
+
+    while (cont)
+    {
+        wxString fullPath = wxFileName(path, filename).GetFullPath();
+        wxTreeItemId newItem = m_treeCtrl->AppendItem(parentId, filename);
+
+        if (wxDir::Exists(fullPath))
+        {
+            PopulateTreeWithDirs(fullPath, newItem);
+        }
+
+        cont = dir.GetNext(&filename);
+    }
+}
+
+void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
+{
+    if (!m_treeCtrl || !m_Editor)
+        return;
+
+    wxTreeItemId itemId = event.GetItem();
+    wxString path = GetItemPath(itemId);
+
+    if (wxDir::Exists(path))
+    {
+        m_treeCtrl->Toggle(itemId);
+    }
+    else
+    {
+        wxFile file(path);
+        if (file.IsOpened())
+        {
+            wxString content;
+            file.ReadAll(&content);
+            m_Editor->SetText(content);
+            m_currentFile = path;
+            UpdateTitle();
+        }
+    }
+}
+
+wxString MyFrame::GetItemPath(wxTreeItemId itemId)
+{
+    wxString path = m_treeCtrl->GetItemText(itemId);
+    wxTreeItemId parent = m_treeCtrl->GetItemParent(itemId);
+    while (parent.IsOk() && parent != m_treeCtrl->GetRootItem())
+    {
+        path = m_treeCtrl->GetItemText(parent) + wxFileName::GetPathSeparator() + path;
+        parent = m_treeCtrl->GetItemParent(parent);
+    }
+
+    return wxFileName(m_rootPath, path).GetFullPath();
+}
+
+void MyFrame::UpdateTitle()
+{
     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
     SetTitle(title + " - CodeLite");
 }
 
-void MyFrame::OnNewWindow(wxCommandEvent &event) {
-    MyFrame *newFrame = new MyFrame(wxEmptyString,wxEmptyString);
+void MyFrame::OnNewWindow(wxCommandEvent &event)
+{
+    MyFrame *newFrame = new MyFrame(wxEmptyString, wxEmptyString);
     newFrame->Show(true);
 }
 

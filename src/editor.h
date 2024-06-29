@@ -9,11 +9,10 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0);
-    // methods for undo/redo
     void Undo();
     void Redo();
 
 private:
     void SetupEditor();
     void SetupStyles();
-}; 
+};

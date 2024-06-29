@@ -5,7 +5,6 @@
 #include <wx/filename.h>
 #include <wx/dir.h>
 
-#include <iostream>
 
 wxIMPLEMENT_APP(MyApp);
 
@@ -23,12 +22,12 @@ MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     CreateMenuBar();
     BindEventHandlers();
 
-    // m_Editor = new Editor(this);
-
-    // Set up the main sizer to add other sizer if decalre  append in main sizer
-    // wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
-    // mainSizer->Add(m_Editor, 1, wxEXPAND);
-    // SetSizer(mainSizer);
+    if(!filepath.IsEmpty()){
+        CreateTab(filepath);
+    }
+    else{
+        CreateTab();
+    }
 
     Centre();
 
@@ -116,6 +115,10 @@ void MyFrame::CreateTab(const wxString &filename)
             }
         }
     }
+    else {
+        CreateTab();
+    }
+    UpdateTitle();
 }
 
 void MyFrame::CloseTab(size_t index)
@@ -123,16 +126,28 @@ void MyFrame::CloseTab(size_t index)
     if (index < m_editors.size())
     {
         delete m_editors[index];
-        m_editors.erase(m_editors.begin() + index);
+        // m_editors.erase(m_editors.begin() + index);
         m_notebook->DeletePage(index);
     }
+
+    if(m_notebook->GetPageCount() == 0) {
+        CreateTab();
+    }
+    UpdateTitle();
 }
 
 void MyFrame::onTabClose(wxAuiNotebookEvent &event)
 {
     int index = event.GetSelection();
+    event.Veto();
     CloseTab(index);
 }
+
+void MyFrame::OnTabChange(wxAuiNotebookEvent &event){
+    UpdateTitle();
+    event.Skip();
+}
+
 void MyFrame::BindEventHandlers()
 {
 
@@ -157,9 +172,11 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnDocumentation, this, ID_Documentation);
     // Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
 
+
     m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &MyFrame::OnTreeItemActivated, this);
 
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &MyFrame::onTabClose, this);
+    m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MyFrame::OnTabChange, this);
 }
 
 void MyFrame::OnOpenFolder(wxCommandEvent &event)
@@ -230,6 +247,7 @@ void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
     if (wxFile::Exists(path))
     {
         CreateTab(path);
+        UpdateTitle();
     }
     else if (wxDir::Exists(path))
     {
@@ -262,12 +280,15 @@ void MyFrame::UpdateTitle()
     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
     SetTitle(title + " - CodeLite");
 
-    // int currentPage = m_notebook->GetSelection();
-    // if (currentPage != wxNOT_FOUND)
-    // {
-    //     wxString title = m_notebook->GetPageText(currentPage);
-    //     // SetTitle(title + " - CodeLite ");
-    // }
+    int currentPage = m_notebook->GetSelection();
+    if (currentPage != wxNOT_FOUND)
+    {
+        wxString title = m_notebook->GetPageText(currentPage);
+        SetTitle(title + " - CodeLite ");
+    } 
+    else {
+        SetTitle("Code Editor");
+    }
 }
 
 void MyFrame::OnNewWindow(wxCommandEvent &event)

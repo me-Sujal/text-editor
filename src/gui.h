@@ -54,6 +54,7 @@ private:
 
     // For dynamics title
     void UpdateTitle();
+    void OnTabChange(wxAuiNotebookEvent &event);
 
     void PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId);
     void OnTreeItemActivated(wxTreeEvent &event);

@@ -17,7 +17,7 @@ public:
 class MyFrame : public wxFrame
 {
 public:
-    MyFrame(const wxString &filepath, const wxString &initialContent);
+    MyFrame(const wxString& filepath, const wxString& initialContent);
 
 private:
     void CreateMenuBar();
@@ -25,46 +25,48 @@ private:
     void BindEventHandlers();
 
     // File menu event handlers
-    void OnNewFile(wxCommandEvent &event);
-    void OnNewWindow(wxCommandEvent &event);
-    void OnOpenFile(wxCommandEvent &event);
-    void OnOpenFolder(wxCommandEvent &event);
-    void OnSave(wxCommandEvent &event);
-    void OnSaveAs(wxCommandEvent &event);
-    void OnSaveAll(wxCommandEvent &event);
-    void OnQuit(wxCommandEvent &event);
+    void OnNewFile(wxCommandEvent& event);
+    void OnNewWindow(wxCommandEvent& event);
+    void OnOpenFile(wxCommandEvent& event);
+    void OnOpenFolder(wxCommandEvent& event);
+    void OnSave(wxCommandEvent& event);
+    void OnSaveAs(wxCommandEvent& event);
+    void OnSaveAll(wxCommandEvent& event);
+    void OnQuit(wxCommandEvent& event);
 
     // Edit menu event handlers
-    void OnCut(wxCommandEvent &event);
-    void OnCopy(wxCommandEvent &event);
-    void OnPaste(wxCommandEvent &event);
-    void OnWrap(wxCommandEvent &event);
-    void OnSelection(wxCommandEvent &event);
+    void OnCut(wxCommandEvent& event);
+    void OnCopy(wxCommandEvent& event);
+    void OnPaste(wxCommandEvent& event);
+    void OnWrap(wxCommandEvent& event);
+    void OnSelection(wxCommandEvent& event);
+    void OnUndo(wxCommandEvent& event);
+    void OnRedo(wxCommandEvent& event);
 
     // Help menu event handlers
-    void OnDocumentation(wxCommandEvent &event);
-    void OnAbout(wxCommandEvent &event);
+    void OnDocumentation(wxCommandEvent& event);
+    void OnAbout(wxCommandEvent& event);
 
-    wxAuiNotebook *m_notebook;
+    wxAuiNotebook* m_notebook;
     std::vector<Editor*>m_editors;
 
     void CreateTab(const wxString& filename = wxEmptyString);
     void CloseTab(size_t index);
-    void onTabClose(wxAuiNotebookEvent &event);
+    void onTabClose(wxAuiNotebookEvent& event);
 
     // For dynamics title
     void UpdateTitle();
     void OnTabChange(wxAuiNotebookEvent &event);
 
-    void PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId);
-    void OnTreeItemActivated(wxTreeEvent &event);
+    void PopulateTreeWithDirs(const wxString& path, wxTreeItemId parentId);
+    void OnTreeItemActivated(wxTreeEvent& event);
     wxString GetItemPath(wxTreeItemId itemId);
 
-    wxTreeCtrl *m_treeCtrl;
-    wxSplitterWindow *m_splitter;
+    wxTreeCtrl* m_treeCtrl;
+    wxSplitterWindow* m_splitter;
 
     // Editor Declaration
-    Editor *m_Editor;
+    Editor* m_Editor;
 
     wxString m_rootPath;
     wxString m_currentFile;
@@ -86,4 +88,4 @@ enum
     ID_Wrap = 11,
     ID_Documentation = 12,
     ID_About = 13
-};
+}; 

@@ -15,7 +15,7 @@ bool MyApp::OnInit()
     return true;
 }
 
-MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
+MyFrame::MyFrame(const wxString& filepath, const wxString& initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
 {
     CreateLayout();
@@ -59,6 +59,8 @@ void MyFrame::CreateMenuBar()
     editMenu->Append(ID_Paste, "&Paste\tCtrl+V");
     editMenu->AppendSeparator();
     editMenu->Append(ID_Wrap, "&Wrap");
+    editMenu->Append(wxID_UNDO, "&Undo\tCtrl+Z");
+    editMenu->Append(wxID_REDO, "&Redo\tCtrl+Y");
     menuBar->Append(editMenu, "&Edit");
 
     // Help menu
@@ -90,7 +92,7 @@ void MyFrame::CreateLayout()
     CreateTab();
 }
 
-void MyFrame::CreateTab(const wxString &filename)
+void MyFrame::CreateTab(const wxString& filename)
 {
 
     wxString title = filename.IsEmpty() ? "Untitled" : wxFileName(filename).GetFullName();
@@ -136,7 +138,7 @@ void MyFrame::CloseTab(size_t index)
     UpdateTitle();
 }
 
-void MyFrame::onTabClose(wxAuiNotebookEvent &event)
+void MyFrame::onTabClose(wxAuiNotebookEvent& event)
 {
     int index = event.GetSelection();
     event.Veto();
@@ -157,6 +159,8 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
+    Bind(wxEVT_MENU, &MyFrame::OnUndo, this, wxID_UNDO);
+    Bind(wxEVT_MENU, &MyFrame::OnRedo, this, wxID_REDO);
     // Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
     // Bind(wxEVT_MENU, &MyFrame::OnSaveAs, this, ID_SaveAs);
     // Bind(wxEVT_MENU, &MyFrame::OnSaveAll, this, ID_SaveAll);
@@ -179,7 +183,7 @@ void MyFrame::BindEventHandlers()
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MyFrame::OnTabChange, this);
 }
 
-void MyFrame::OnOpenFolder(wxCommandEvent &event)
+void MyFrame::OnOpenFolder(wxCommandEvent& event)
 {
     wxDirDialog dlg(nullptr, "Choose Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
     if (dlg.ShowModal() == wxID_CANCEL)
@@ -194,7 +198,7 @@ void MyFrame::OnOpenFolder(wxCommandEvent &event)
     m_treeCtrl->Expand(rootId);
 }
 
-void MyFrame::PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId)
+void MyFrame::PopulateTreeWithDirs(const wxString& path, wxTreeItemId parentId)
 {
     wxDir dir(path);
     if (!dir.IsOpened())
@@ -219,7 +223,7 @@ void MyFrame::PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId)
     }
 }
 
-void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
+void MyFrame::OnTreeItemActivated(wxTreeEvent& event)
 {
     if (!m_treeCtrl || !m_Editor)
         return;
@@ -291,13 +295,13 @@ void MyFrame::UpdateTitle()
     }
 }
 
-void MyFrame::OnNewWindow(wxCommandEvent &event)
+void MyFrame::OnNewWindow(wxCommandEvent& event)
 {
     MyFrame *newFrame = new MyFrame(wxEmptyString, wxEmptyString);
     newFrame->Show(true);
 }
 
-void MyFrame::OnOpenFile(wxCommandEvent &event)
+void MyFrame::OnOpenFile(wxCommandEvent& event)
 {
     wxFileDialog openFileDialog(this, "Open File", "", "", "All Files(*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     if (openFileDialog.ShowModal() == wxID_CANCEL)
@@ -321,4 +325,12 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
     // m_Editor->SetText(content);
     // m_currentFile = filePath;
     // UpdateTitle();
+}
+void MyFrame::OnUndo(wxCommandEvent& event)
+{
+    m_Editor->Undo();
+}
+void MyFrame::OnRedo(wxCommandEvent& event)
+{
+    m_Editor->Redo();
 }

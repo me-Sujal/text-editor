@@ -22,8 +22,6 @@ void Editor::SetupEditor()
     // for line numbers
     SetMarginType(0, wxSTC_MARGIN_NUMBER);
     SetMarginWidth(0, 25);
-
-    //to enable undo/redo functionality
     SetUndoCollection(true);
     EmptyUndoBuffer();
 

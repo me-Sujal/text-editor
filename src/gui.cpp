@@ -96,12 +96,11 @@ void MyFrame::CreateTab(const wxString& filename)
 {
 
     wxString title = filename.IsEmpty() ? "Untitled" : wxFileName(filename).GetFullName();
-
-    if (!filename.IsEmpty())
-    {
         m_Editor = new Editor(m_notebook);
         m_editors.push_back(m_Editor);
         m_notebook->AddPage(m_Editor, title, true);
+    if (!filename.IsEmpty())
+    {
 
         if (!filename.IsEmpty())
         {
@@ -116,9 +115,6 @@ void MyFrame::CreateTab(const wxString& filename)
                 }
             }
         }
-    }
-    else {
-        CreateTab();
     }
     UpdateTitle();
 }
@@ -328,9 +324,14 @@ void MyFrame::OnOpenFile(wxCommandEvent& event)
 }
 void MyFrame::OnUndo(wxCommandEvent& event)
 {
-    m_Editor->Undo();
+    int currentPage = m_notebook->GetSelection();
+    if(currentPage != wxNOT_FOUND && currentPage < m_editors.size())
+    m_editors[currentPage]->Undo();
 }
+
 void MyFrame::OnRedo(wxCommandEvent& event)
 {
-    m_Editor->Redo();
+    int currentPage = m_notebook->GetSelection();
+    if (currentPage != wxNOT_FOUND && currentPage < m_editors.size())
+        m_editors[currentPage]->Redo();
 }

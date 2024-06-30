@@ -77,7 +77,7 @@ void MyFrame::CreateLayout()
     mainSizer->Add(m_splitter, 1, wxEXPAND);
     SetSizer(mainSizer);
 
-    CreateTab();
+    // CreateTab();
 }
 
 void MyFrame::CreateTab(const wxString &filename)

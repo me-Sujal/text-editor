@@ -1,36 +1,24 @@
-#include "gui.h"
-#include "editor.h"
-#include <wx/wx.h>
-#include <wx/file.h>
-#include <wx/filename.h>
-#include <wx/dir.h>
+#include "mainframe.h"
+#include "../utils/file_utils.h"
 
 
-wxIMPLEMENT_APP(MyApp);
-
-bool MyApp::OnInit()
-{
-    MyFrame *frame = new MyFrame(wxEmptyString, wxEmptyString);
-    frame->Show();
-    return true;
-}
-
-MyFrame::MyFrame(const wxString& filepath, const wxString& initialContent)
+MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
 {
     CreateLayout();
     CreateMenuBar();
     BindEventHandlers();
 
-    if(!filepath.IsEmpty()){
+    if (!filepath.IsEmpty())
+    {
         CreateTab(filepath);
     }
-    else{
+    else
+    {
         CreateTab();
     }
 
     Centre();
-
     m_currentFile = filepath;
 }
 
@@ -92,28 +80,19 @@ void MyFrame::CreateLayout()
     CreateTab();
 }
 
-void MyFrame::CreateTab(const wxString& filename)
+void MyFrame::CreateTab(const wxString &filename)
 {
+    wxString title = filename.IsEmpty() ? "Untitled" : GetFileName(filename);
+    m_Editor = new Editor(m_notebook);
+    m_editors.push_back(m_Editor);
+    m_notebook->AddPage(m_Editor, title, true);
 
-    wxString title = filename.IsEmpty() ? "Untitled" : wxFileName(filename).GetFullName();
-        m_Editor = new Editor(m_notebook);
-        m_editors.push_back(m_Editor);
-        m_notebook->AddPage(m_Editor, title, true);
     if (!filename.IsEmpty())
     {
-
-        if (!filename.IsEmpty())
+        wxString content = ReadFileContent(filename);
+        if (!content.IsEmpty())
         {
-            wxFile file(filename);
-            if (file.IsOpened())
-            {
-                wxString content;
-                if (file.ReadAll(&content))
-                {
-
-                    m_Editor->SetText(content);
-                }
-            }
+            m_Editor->SetText(content);
         }
     }
     UpdateTitle();
@@ -128,20 +107,22 @@ void MyFrame::CloseTab(size_t index)
         m_notebook->DeletePage(index);
     }
 
-    if(m_notebook->GetPageCount() == 0) {
+    if (m_notebook->GetPageCount() == 0)
+    {
         CreateTab();
     }
     UpdateTitle();
 }
 
-void MyFrame::onTabClose(wxAuiNotebookEvent& event)
+void MyFrame::onTabClose(wxAuiNotebookEvent &event)
 {
     int index = event.GetSelection();
     event.Veto();
     CloseTab(index);
 }
 
-void MyFrame::OnTabChange(wxAuiNotebookEvent &event){
+void MyFrame::OnTabChange(wxAuiNotebookEvent &event)
+{
     UpdateTitle();
     event.Skip();
 }
@@ -172,14 +153,13 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnDocumentation, this, ID_Documentation);
     // Bind(wxEVT_MENU, &MyFrame::OnAbout, this, wxID_ABOUT);
 
-
     m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &MyFrame::OnTreeItemActivated, this);
 
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &MyFrame::onTabClose, this);
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MyFrame::OnTabChange, this);
 }
 
-void MyFrame::OnOpenFolder(wxCommandEvent& event)
+void MyFrame::OnOpenFolder(wxCommandEvent &event)
 {
     wxDirDialog dlg(nullptr, "Choose Directory", "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
     if (dlg.ShowModal() == wxID_CANCEL)
@@ -194,7 +174,7 @@ void MyFrame::OnOpenFolder(wxCommandEvent& event)
     m_treeCtrl->Expand(rootId);
 }
 
-void MyFrame::PopulateTreeWithDirs(const wxString& path, wxTreeItemId parentId)
+void MyFrame::PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId)
 {
     wxDir dir(path);
     if (!dir.IsOpened())
@@ -219,7 +199,7 @@ void MyFrame::PopulateTreeWithDirs(const wxString& path, wxTreeItemId parentId)
     }
 }
 
-void MyFrame::OnTreeItemActivated(wxTreeEvent& event)
+void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
 {
     if (!m_treeCtrl || !m_Editor)
         return;
@@ -285,19 +265,20 @@ void MyFrame::UpdateTitle()
     {
         wxString title = m_notebook->GetPageText(currentPage);
         SetTitle(title + " - CodeLite ");
-    } 
-    else {
+    }
+    else
+    {
         SetTitle("Code Editor");
     }
 }
 
-void MyFrame::OnNewWindow(wxCommandEvent& event)
+void MyFrame::OnNewWindow(wxCommandEvent &event)
 {
     MyFrame *newFrame = new MyFrame(wxEmptyString, wxEmptyString);
     newFrame->Show(true);
 }
 
-void MyFrame::OnOpenFile(wxCommandEvent& event)
+void MyFrame::OnOpenFile(wxCommandEvent &event)
 {
     wxFileDialog openFileDialog(this, "Open File", "", "", "All Files(*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     if (openFileDialog.ShowModal() == wxID_CANCEL)
@@ -322,16 +303,17 @@ void MyFrame::OnOpenFile(wxCommandEvent& event)
     // m_currentFile = filePath;
     // UpdateTitle();
 }
-void MyFrame::OnUndo(wxCommandEvent& event)
+void MyFrame::OnUndo(wxCommandEvent &event)
 {
     int currentPage = m_notebook->GetSelection();
-    if(currentPage != wxNOT_FOUND && currentPage < m_editors.size())
-    m_editors[currentPage]->Undo();
+    if (currentPage != wxNOT_FOUND && currentPage < m_editors.size())
+        m_editors[currentPage]->Undo();
 }
 
-void MyFrame::OnRedo(wxCommandEvent& event)
+void MyFrame::OnRedo(wxCommandEvent &event)
 {
     int currentPage = m_notebook->GetSelection();
     if (currentPage != wxNOT_FOUND && currentPage < m_editors.size())
         m_editors[currentPage]->Redo();
 }
+// ... (implement other methods of MyFrame)

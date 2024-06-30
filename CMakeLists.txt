@@ -13,12 +13,15 @@ add_definitions(-DwxUSE_STC=1)
 
 # Add your source files
 set(SOURCE_FILES 
-    src/gui.cpp
-    src/editor.cpp
+    src/main.cpp
+    src/app.cpp
+    src/editor/editor.cpp
+    src/gui/mainframe.cpp
+    src/utils/file_utils.cpp
     # Add other .cpp files if you have any
 )
 
-# Create the executable
+# Create the executablez
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 # Link wxWidgets libraries

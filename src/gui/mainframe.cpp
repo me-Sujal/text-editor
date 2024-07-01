@@ -1,6 +1,6 @@
 #include "mainframe.h"
 #include "../utils/file_utils.h"
-
+#include <wx/utils.h>
 
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
@@ -60,79 +60,12 @@ void MyFrame::CreateMenuBar()
     SetMenuBar(menuBar);
 }
 
-void MyFrame::CreateLayout()
-{
-    m_splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
-
-    m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
-
-    // m_Editor = new Editor(m_splitter);
-    m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS);
-
-    m_splitter->SplitVertically(m_treeCtrl, m_notebook);
-    m_splitter->SetMinimumPaneSize(100);
-    m_splitter->SetSashPosition(200);
-
-    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(m_splitter, 1, wxEXPAND);
-    SetSizer(mainSizer);
-
-    // CreateTab();
-}
-
-void MyFrame::CreateTab(const wxString &filename)
-{
-    wxString title = filename.IsEmpty() ? "Untitled" : GetFileName(filename);
-    m_Editor = new Editor(m_notebook);
-    m_editors.push_back(m_Editor);
-    m_notebook->AddPage(m_Editor, title, true);
-
-    if (!filename.IsEmpty())
-    {
-        wxString content = ReadFileContent(filename);
-        if (!content.IsEmpty())
-        {
-            m_Editor->SetText(content);
-        }
-    }
-    UpdateTitle();
-}
-
-void MyFrame::CloseTab(size_t index)
-{
-    if (index < m_editors.size())
-    {
-        delete m_editors[index];
-        // m_editors.erase(m_editors.begin() + index);
-        m_notebook->DeletePage(index);
-    }
-
-    if (m_notebook->GetPageCount() == 0)
-    {
-        CreateTab();
-    }
-    UpdateTitle();
-}
-
-void MyFrame::onTabClose(wxAuiNotebookEvent &event)
-{
-    int index = event.GetSelection();
-    event.Veto();
-    CloseTab(index);
-}
-
-void MyFrame::OnTabChange(wxAuiNotebookEvent &event)
-{
-    UpdateTitle();
-    event.Skip();
-}
-
 void MyFrame::BindEventHandlers()
 {
 
     // All the Event Handlers goes here
     // // File menu
-    // Bind(wxEVT_MENU, &MyFrame::OnNewFile, this, ID_NewFile);
+    Bind(wxEVT_MENU, &MyFrame::OnNewFile, this, ID_NewFile);
     Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
@@ -157,6 +90,73 @@ void MyFrame::BindEventHandlers()
 
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &MyFrame::onTabClose, this);
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MyFrame::OnTabChange, this);
+}
+
+void MyFrame::CreateLayout()
+{
+    m_splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
+
+    m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
+
+    // m_Editor = new Editor(m_splitter);
+    m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS);
+
+    m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+    m_splitter->SetMinimumPaneSize(100);
+    m_splitter->SetSashPosition(200);
+
+    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(m_splitter, 1, wxEXPAND);
+    SetSizer(mainSizer);
+}
+
+void MyFrame::CreateTab(const wxString &filename)
+{
+    wxString title = filename.IsEmpty() ? "Untitled" : GetFileName(filename);
+    Editor *newEditor = new Editor(m_notebook);
+    m_editors.push_back(newEditor);
+    m_notebook->AddPage(newEditor, title, true);
+
+    if (!filename.IsEmpty())
+    {
+        wxString content = ReadFileContent(filename);
+        if (!content.IsEmpty())
+        {
+            newEditor->SetText(content);
+        }
+    }
+    UpdateTitle();
+}
+
+void MyFrame::onTabClose(wxAuiNotebookEvent &event)
+{
+    int index = event.GetSelection();
+    event.Skip();
+
+    wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+}
+
+void MyFrame::onCloseTabCleanup(wxCommandEvent &event)
+{
+    int index = m_notebook->GetSelection();
+    if (index != wxNOT_FOUND && index < m_editors.size())
+    {
+        delete m_editors[index];
+        m_editors.erase(m_editors.begin() + index);
+    }
+
+    if (m_notebook->GetPageCount() == 0)
+    {
+        CreateTab();
+    }
+
+    UpdateTitle();
+}
+
+void MyFrame::OnTabChange(wxAuiNotebookEvent &event)
+{
+    UpdateTitle();
+    event.Skip();
 }
 
 void MyFrame::OnOpenFolder(wxCommandEvent &event)
@@ -201,28 +201,8 @@ void MyFrame::PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId)
 
 void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
 {
-    if (!m_treeCtrl || !m_Editor)
-        return;
-
     wxTreeItemId itemId = event.GetItem();
     wxString path = GetItemPath(itemId);
-
-    // if (wxDir::Exists(path))
-    // {
-    //     m_treeCtrl->Toggle(itemId);
-    // }
-    // else
-    // {
-    //     wxFile file(path);
-    //     if (file.IsOpened())
-    //     {
-    //         wxString content;
-    //         file.ReadAll(&content);
-    //         m_Editor->SetText(content);
-    //         m_currentFile = path;
-    //         UpdateTitle();
-    //     }
-    // }
 
     if (wxFile::Exists(path))
     {
@@ -272,6 +252,10 @@ void MyFrame::UpdateTitle()
     }
 }
 
+void MyFrame::OnNewFile(wxCommandEvent &event){
+    CreateTab();
+}
+
 void MyFrame::OnNewWindow(wxCommandEvent &event)
 {
     MyFrame *newFrame = new MyFrame(wxEmptyString, wxEmptyString);
@@ -287,33 +271,43 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
     wxString filePath = openFileDialog.GetPath();
 
     CreateTab(filePath);
-    // wxFile file(filePath);
-
-    // if (!file.IsOpened())
-    // {
-    //     wxMessageBox("Oops! Cannot Open file ' " + filePath + "'.", "Error", wxOK | wxICON_ERROR);
-    //     return;
-    // }
-
-    // wxString content;
-    // file.ReadAll(&content);
-    // file.Close();
-
-    // m_Editor->SetText(content);
-    // m_currentFile = filePath;
-    // UpdateTitle();
 }
-void MyFrame::OnUndo(wxCommandEvent &event)
+
+Editor *MyFrame::GetCurrentEditor()
 {
     int currentPage = m_notebook->GetSelection();
     if (currentPage != wxNOT_FOUND && currentPage < m_editors.size())
-        m_editors[currentPage]->Undo();
+    {
+        return m_editors[currentPage];
+    }
+
+    return nullptr;
+}
+
+void MyFrame::OnUndo(wxCommandEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        currentEditor->Undo();
+    }
 }
 
 void MyFrame::OnRedo(wxCommandEvent &event)
 {
-    int currentPage = m_notebook->GetSelection();
-    if (currentPage != wxNOT_FOUND && currentPage < m_editors.size())
-        m_editors[currentPage]->Redo();
+  
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        currentEditor->Redo();
+    }
 }
-// ... (implement other methods of MyFrame)
+
+MyFrame::~MyFrame()
+{
+    m_editors.clear();
+    for (Editor *editor : m_editors)
+    {
+        delete editor;
+    }
+}

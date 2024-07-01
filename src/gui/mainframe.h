@@ -12,12 +12,14 @@ class MyFrame : public wxFrame
 {
 public:
     MyFrame(const wxString &filepath, const wxString &initialContent);
+    ~MyFrame();
 
 private:
     void CreateMenuBar();
     void CreateLayout();
     void BindEventHandlers();
 
+    void OnNewFile(wxCommandEvent &event);
     void OnNewWindow(wxCommandEvent &event);
     void OnOpenFile(wxCommandEvent &event);
     void OnOpenFolder(wxCommandEvent &event);
@@ -25,20 +27,20 @@ private:
     void OnRedo(wxCommandEvent &event);
 
     void CreateTab(const wxString &filename = wxEmptyString);
-    void CloseTab(size_t index);
     void onTabClose(wxAuiNotebookEvent &event);
     void UpdateTitle();
     void OnTabChange(wxAuiNotebookEvent &event);
 
     void PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId);
     void OnTreeItemActivated(wxTreeEvent &event);
+    void onCloseTabCleanup(wxCommandEvent &event);
     wxString GetItemPath(wxTreeItemId itemId);
 
     wxAuiNotebook *m_notebook;
     std::vector<Editor *> m_editors;
     wxTreeCtrl *m_treeCtrl;
     wxSplitterWindow *m_splitter;
-    Editor *m_Editor;
+    Editor *GetCurrentEditor();
     wxString m_rootPath;
     wxString m_currentFile;
 };
@@ -58,5 +60,6 @@ enum
     ID_Paste,
     ID_Wrap,
     ID_Documentation,
-    ID_About
+    ID_About,
+    ID_CLOSE_TAB_CLEANUP
 };

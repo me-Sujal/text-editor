@@ -29,6 +29,7 @@ private:
     void CreateTab(const wxString &filename = wxEmptyString);
     void onTabClose(wxAuiNotebookEvent &event);
     void UpdateTitle();
+    void UpdateTitle(int Count);//overloaded function
     void OnTabChange(wxAuiNotebookEvent &event);
 
     void PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId);

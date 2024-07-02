@@ -134,10 +134,15 @@ void MyFrame::onTabClose(wxAuiNotebookEvent &event)
     event.Skip();
 
     wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+    int tabCount = m_notebook->GetPageCount();
+    // wxMessageBox(wxString::Format("Current tab count: %d", tabCount), "Tab Count", wxOK | wxICON_INFORMATION);
+
+    UpdateTitle(tabCount - 1); // - 1 because while updating the count it stays at 1 for some reason even if last of tab has been closed
 }
 
 void MyFrame::onCloseTabCleanup(wxCommandEvent &event)
 {
+
     int index = m_notebook->GetSelection();
     if (index != wxNOT_FOUND && index < m_editors.size())
     {
@@ -149,8 +154,6 @@ void MyFrame::onCloseTabCleanup(wxCommandEvent &event)
     {
         CreateTab();
     }
-
-    UpdateTitle();
 }
 
 void MyFrame::OnTabChange(wxAuiNotebookEvent &event)
@@ -237,22 +240,31 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
 
 void MyFrame::UpdateTitle()
 {
-    wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
-    SetTitle(title + " - CodeLite");
-
-    int currentPage = m_notebook->GetSelection();
-    if (currentPage != wxNOT_FOUND)
+    if (m_notebook->GetPageCount() < 1)
     {
-        wxString title = m_notebook->GetPageText(currentPage);
-        SetTitle(title + " - CodeLite ");
+        SetTitle("CodeLite");
     }
     else
     {
-        SetTitle("Code Editor");
+        wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
+        SetTitle(title + " - CodeLite");
     }
 }
 
-void MyFrame::OnNewFile(wxCommandEvent &event){
+void MyFrame::UpdateTitle(int count)
+{
+    if (count == 0)
+    {
+        SetTitle("CodeLite");}
+    else
+    {
+        wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
+        SetTitle(title + " - CodeLite");
+    }
+}
+
+void MyFrame::OnNewFile(wxCommandEvent &event)
+{
     CreateTab();
 }
 
@@ -295,7 +307,7 @@ void MyFrame::OnUndo(wxCommandEvent &event)
 
 void MyFrame::OnRedo(wxCommandEvent &event)
 {
-  
+
     Editor *currentEditor = GetCurrentEditor();
     if (currentEditor)
     {

@@ -240,14 +240,26 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
 
 void MyFrame::UpdateTitle()
 {
-    if (m_notebook->GetPageCount() < 1)
+    // if (m_notebook->GetPageCount() < 1)
+    // {
+    //     SetTitle("CodeLite");
+    // }
+    // else
+    // {
+    //     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
+    //     SetTitle(title + " - CodeLite");
+    // }
+        // wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
+        // SetTitle(title + " - CodeLite");
+    int currentPage = m_notebook->GetSelection();
+    if (currentPage != wxNOT_FOUND)
     {
-        SetTitle("CodeLite");
+        wxString title = m_notebook->GetPageText(currentPage);
+        SetTitle(title + " - CodeLite ");
     }
     else
     {
-        wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
-        SetTitle(title + " - CodeLite");
+        SetTitle("Code Editor");
     }
 }
 
@@ -256,11 +268,11 @@ void MyFrame::UpdateTitle(int count)
     if (count == 0)
     {
         SetTitle("CodeLite");}
-    else
-    {
-        wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
-        SetTitle(title + " - CodeLite");
-    }
+    // else
+    // {
+    //     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
+    //     SetTitle(title + " - CodeLite");
+    // }
 }
 
 void MyFrame::OnNewFile(wxCommandEvent &event)

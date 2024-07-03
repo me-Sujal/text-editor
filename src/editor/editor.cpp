@@ -51,6 +51,20 @@ void Editor::SetupStyles()
     // Refresh();
     // Update();
 }
+void Editor::Cut()
+{
+    wxStyledTextCtrl::Cut();
+}
+
+void Editor::Copy()
+{
+    wxStyledTextCtrl::Copy();
+}
+
+void Editor::Paste()
+{
+    wxStyledTextCtrl::Paste();
+}
 
 void Editor::Undo()
 {

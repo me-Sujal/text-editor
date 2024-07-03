@@ -15,6 +15,8 @@ public:
     ~MyFrame();
 
 private:
+    bool m_isWrapEnabled = false;
+    wxMenuItem *m_wrapMenuItem = nullptr;
     void CreateMenuBar();
     void CreateLayout();
     void BindEventHandlers();
@@ -23,6 +25,10 @@ private:
     void OnNewWindow(wxCommandEvent &event);
     void OnOpenFile(wxCommandEvent &event);
     void OnOpenFolder(wxCommandEvent &event);
+    void OnCut(wxCommandEvent &event);
+    void OnCopy(wxCommandEvent &event);
+    void OnPaste(wxCommandEvent &event);
+    void OnWrap(wxCommandEvent &event);
     void OnUndo(wxCommandEvent &event);
     void OnRedo(wxCommandEvent &event);
 

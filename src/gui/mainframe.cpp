@@ -46,7 +46,7 @@ void MyFrame::CreateMenuBar()
     editMenu->Append(ID_Copy, "&Copy\tCtrl+C");
     editMenu->Append(ID_Paste, "&Paste\tCtrl+V");
     editMenu->AppendSeparator();
-    editMenu->Append(ID_Wrap, "&Wrap");
+    m_wrapMenuItem = editMenu->AppendCheckItem(ID_Wrap, "&Wrap");
     editMenu->Append(wxID_UNDO, "&Undo\tCtrl+Z");
     editMenu->Append(wxID_REDO, "&Redo\tCtrl+Y");
     menuBar->Append(editMenu, "&Edit");
@@ -69,6 +69,10 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
+    Bind(wxEVT_MENU, &MyFrame::OnCut, this, ID_Cut);
+    Bind(wxEVT_MENU, &MyFrame::OnCopy, this, ID_Copy);
+    Bind(wxEVT_MENU, &MyFrame::OnPaste, this, ID_Paste);
+    Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
     Bind(wxEVT_MENU, &MyFrame::OnUndo, this, wxID_UNDO);
     Bind(wxEVT_MENU, &MyFrame::OnRedo, this, wxID_REDO);
     // Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
@@ -114,6 +118,7 @@ void MyFrame::CreateTab(const wxString &filename)
 {
     wxString title = filename.IsEmpty() ? "Untitled" : GetFileName(filename);
     Editor *newEditor = new Editor(m_notebook);
+    newEditor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
     m_editors.push_back(newEditor);
     m_notebook->AddPage(newEditor, title, true);
 
@@ -306,6 +311,50 @@ Editor *MyFrame::GetCurrentEditor()
     }
 
     return nullptr;
+}
+void MyFrame::OnCut(wxCommandEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        currentEditor->Cut();
+    }
+}
+
+void MyFrame::OnCopy(wxCommandEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        currentEditor->Copy();
+    }
+}
+
+void MyFrame::OnPaste(wxCommandEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        currentEditor->Paste();
+    }
+}
+
+void MyFrame::OnWrap(wxCommandEvent &event)
+{
+    m_isWrapEnabled = !m_isWrapEnabled;
+    m_wrapMenuItem->Check(m_isWrapEnabled);
+
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        currentEditor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
+    }
+
+    // Apply wrap setting to all open editors
+    for (Editor *editor : m_editors)
+    {
+        editor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
+    }
 }
 
 void MyFrame::OnUndo(wxCommandEvent &event)

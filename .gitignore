@@ -1,3 +1,4 @@
+.vs/*
 # Ignore build artifacts
 /build/*
 /bin/

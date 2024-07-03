@@ -1,3 +1,4 @@
+//fucking hell
 #include "editor.h"
 
 Editor::Editor(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style)

@@ -23,6 +23,35 @@ void Editor::SetupEditor()
     SetMarginWidth(0, 50);
     SetUndoCollection(true);
     EmptyUndoBuffer();
+
+    //for code foldings
+
+    SetLexer(wxSTC_LEX_PYTHON);
+
+    SetProperty("fold", "1");
+    SetProperty("fold.comment", "1");
+    SetProperty("fold.compact", "1");
+    SetProperty("fold.python.string.literals", "1");
+
+    SetMarginType(2, wxSTC_MARGIN_SYMBOL);
+    SetMarginWidth(2, 16);
+    SetMarginMask(2, wxSTC_MASK_FOLDERS);
+    SetMarginSensitive(2, true);
+
+    MarkerDefine(wxSTC_MARKNUM_FOLDEROPEN, wxSTC_MARK_MINUS);
+    MarkerDefine(wxSTC_MARKNUM_FOLDER, wxSTC_MARK_PLUS);
+    MarkerDefine(wxSTC_MARKNUM_FOLDERSUB, wxSTC_MARK_VLINE);
+    MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_LCORNER);
+    MarkerDefine(wxSTC_MARKNUM_FOLDEREND, wxSTC_MARK_BOXPLUSCONNECTED);
+    MarkerDefine(wxSTC_MARKNUM_FOLDEROPENMID, wxSTC_MARK_BOXMINUSCONNECTED);
+    MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_TCORNER);
+
+    MarkerSetForeground(wxSTC_MARKNUM_FOLDER, wxColor(0, 0, 0));
+    MarkerSetBackground(wxSTC_MARKNUM_FOLDER, wxColor(255, 255, 255));
+
+    SetFoldFlags(wxSTC_FOLDFLAG_LINEBEFORE_CONTRACTED | wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
+
+    SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW | wxSTC_AUTOMATICFOLD_CLICK | wxSTC_AUTOMATICFOLD_CHANGE);
 }
 
 void Editor::SetupStyles()

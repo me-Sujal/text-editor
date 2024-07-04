@@ -84,7 +84,7 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnCut, this, ID_Cut);
     // Bind(wxEVT_MENU, &MyFrame::OnCopy, this, ID_Copy);
     // Bind(wxEVT_MENU, &MyFrame::OnPaste, this, ID_Paste);
-    // Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
+    Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
 
     // // Help menu
     // Bind(wxEVT_MENU, &MyFrame::OnDocumentation, this, ID_Documentation);
@@ -254,8 +254,8 @@ void MyFrame::UpdateTitle()
     //     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
     //     SetTitle(title + " - CodeLite");
     // }
-        // wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
-        // SetTitle(title + " - CodeLite");
+    // wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
+    // SetTitle(title + " - CodeLite");
     int currentPage = m_notebook->GetSelection();
     if (currentPage != wxNOT_FOUND)
     {
@@ -272,7 +272,8 @@ void MyFrame::UpdateTitle(int count)
 {
     if (count == 0)
     {
-        SetTitle("CodeLite");}
+        SetTitle("CodeLite");
+    }
     // else
     // {
     //     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
@@ -341,19 +342,22 @@ void MyFrame::OnPaste(wxCommandEvent &event)
 
 void MyFrame::OnWrap(wxCommandEvent &event)
 {
-    m_isWrapEnabled = !m_isWrapEnabled;
-    m_wrapMenuItem->Check(m_isWrapEnabled);
-
-    Editor *currentEditor = GetCurrentEditor();
-    if (currentEditor)
+    if ((m_notebook->GetPageCount() - 1) != 0)
     {
-        currentEditor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
-    }
+        m_isWrapEnabled = !m_isWrapEnabled;
+        m_wrapMenuItem->Check(m_isWrapEnabled);
 
-    // Apply wrap setting to all open editors
-    for (Editor *editor : m_editors)
-    {
-        editor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
+        Editor *currentEditor = GetCurrentEditor();
+        if (currentEditor)
+        {
+            currentEditor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
+        }
+
+        // Apply wrap setting to all open editors
+        for (Editor *editor : m_editors)
+        {
+            editor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
+        }
     }
 }
 

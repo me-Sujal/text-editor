@@ -313,6 +313,7 @@ Editor *MyFrame::GetCurrentEditor()
 
     return nullptr;
 }
+
 void MyFrame::OnCut(wxCommandEvent &event)
 {
     Editor *currentEditor = GetCurrentEditor();
@@ -342,7 +343,7 @@ void MyFrame::OnPaste(wxCommandEvent &event)
 
 void MyFrame::OnWrap(wxCommandEvent &event)
 {
-    if ((m_notebook->GetPageCount() - 1) != 0)
+    if ((m_notebook->GetPageCount() - 1) != 0)  // check if all tabs are closed or not 
     {
         m_isWrapEnabled = !m_isWrapEnabled;
         m_wrapMenuItem->Check(m_isWrapEnabled);

@@ -16,10 +16,12 @@ public:
 
 private:
     bool m_isWrapEnabled = false;
+    bool m_isSidePanelShown = true;
     wxMenuItem *m_wrapMenuItem = nullptr;
     void CreateMenuBar();
     void CreateLayout();
     void BindEventHandlers();
+    void ToggleSidePanel(wxCommandEvent &event);
 
     void OnNewFile(wxCommandEvent &event);
     void OnNewWindow(wxCommandEvent &event);
@@ -68,5 +70,6 @@ enum
     ID_Wrap,
     ID_Documentation,
     ID_About,
-    ID_CLOSE_TAB_CLEANUP
+    ID_CLOSE_TAB_CLEANUP, 
+    ID_ToggleButton
 };

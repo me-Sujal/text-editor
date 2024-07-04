@@ -46,7 +46,7 @@ void MyFrame::CreateMenuBar()
     editMenu->Append(ID_Copy, "&Copy\tCtrl+C");
     editMenu->Append(ID_Paste, "&Paste\tCtrl+V");
     editMenu->AppendSeparator();
-    m_wrapMenuItem = editMenu->AppendCheckItem(ID_Wrap, "&Wrap");
+    m_wrapMenuItem = editMenu->AppendCheckItem(ID_Wrap, "&Wrap\tAlt+Z");
     editMenu->Append(wxID_UNDO, "&Undo\tCtrl+Z");
     editMenu->Append(wxID_REDO, "&Redo\tCtrl+Y");
     menuBar->Append(editMenu, "&Edit");
@@ -85,6 +85,7 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnCopy, this, ID_Copy);
     // Bind(wxEVT_MENU, &MyFrame::OnPaste, this, ID_Paste);
     Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
+    Bind(wxEVT_BUTTON, &MyFrame::ToggleSidePanel, this, ID_ToggleButton);
 
     // // Help menu
     // Bind(wxEVT_MENU, &MyFrame::OnDocumentation, this, ID_Documentation);
@@ -100,7 +101,7 @@ void MyFrame::CreateLayout()
 {
     m_splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
 
-    m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT);
+    m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE );
 
     // m_Editor = new Editor(m_splitter);
     m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS);
@@ -108,10 +109,26 @@ void MyFrame::CreateLayout()
     m_splitter->SplitVertically(m_treeCtrl, m_notebook);
     m_splitter->SetMinimumPaneSize(100);
     m_splitter->SetSashPosition(200);
+    wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
 
-    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
+    sidePanel->Add(toggleButton, 0, wxALIGN_RIGHT | wxCENTER, 10);
+
+    wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
+    mainSizer->Add(sidePanel, 0, 10 , wxALL);
     mainSizer->Add(m_splitter, 1, wxEXPAND);
     SetSizer(mainSizer);
+}
+
+void MyFrame::ToggleSidePanel(wxCommandEvent &event)
+{
+    if (m_isSidePanelShown){
+        m_splitter->Unsplit(m_treeCtrl);
+        m_isSidePanelShown = false;
+    } else {
+        m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+        m_isSidePanelShown = true;
+    }
 }
 
 void MyFrame::CreateTab(const wxString &filename)
@@ -343,7 +360,7 @@ void MyFrame::OnPaste(wxCommandEvent &event)
 
 void MyFrame::OnWrap(wxCommandEvent &event)
 {
-    if ((m_notebook->GetPageCount() - 1) != 0)  // check if all tabs are closed or not 
+    if ((m_notebook->GetPageCount() - 1) != 0) // check if all tabs are closed or not
     {
         m_isWrapEnabled = !m_isWrapEnabled;
         m_wrapMenuItem->Check(m_isWrapEnabled);

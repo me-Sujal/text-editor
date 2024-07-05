@@ -144,6 +144,7 @@ void MyFrame::ToggleSidePanel(wxCommandEvent &event)
         m_isSidePanelShown = false;
     } else {
         m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+        m_splitter->SetSashPosition(200);
         m_isSidePanelShown = true;
     }
 }

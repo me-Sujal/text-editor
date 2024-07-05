@@ -43,8 +43,10 @@ private:
     void PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId);
     void OnTreeItemActivated(wxTreeEvent &event);
     void onCloseTabCleanup(wxCommandEvent &event);
+    void onTimer(wxTimerEvent &event);
     wxString GetItemPath(wxTreeItemId itemId);
 
+    wxTimer *m_timer;
     wxAuiNotebook *m_notebook;
     std::vector<Editor *> m_editors;
     wxTreeCtrl *m_treeCtrl;

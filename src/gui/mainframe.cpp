@@ -69,10 +69,7 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
-    Bind(wxEVT_MENU, &MyFrame::OnCut, this, ID_Cut);
-    Bind(wxEVT_MENU, &MyFrame::OnCopy, this, ID_Copy);
-    Bind(wxEVT_MENU, &MyFrame::OnPaste, this, ID_Paste);
-    Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
+  
     Bind(wxEVT_MENU, &MyFrame::OnUndo, this, wxID_UNDO);
     Bind(wxEVT_MENU, &MyFrame::OnRedo, this, wxID_REDO);
     // Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
@@ -81,11 +78,14 @@ void MyFrame::BindEventHandlers()
     // Bind(wxEVT_MENU, &MyFrame::OnQuit, this, wxID_EXIT);
 
     // // Edit menu
-    // Bind(wxEVT_MENU, &MyFrame::OnCut, this, ID_Cut);
-    // Bind(wxEVT_MENU, &MyFrame::OnCopy, this, ID_Copy);
-    // Bind(wxEVT_MENU, &MyFrame::OnPaste, this, ID_Paste);
+    Bind(wxEVT_MENU, &MyFrame::OnCut, this, ID_Cut);
+    Bind(wxEVT_MENU, &MyFrame::OnCopy, this, ID_Copy);
+    Bind(wxEVT_MENU, &MyFrame::OnPaste, this, ID_Paste);
+    Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
+
     Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
     Bind(wxEVT_BUTTON, &MyFrame::ToggleSidePanel, this, ID_ToggleButton);
+    Bind(wxEVT_TIMER, &MyFrame::onTimer, this);
 
     // // Help menu
     // Bind(wxEVT_MENU, &MyFrame::OnDocumentation, this, ID_Documentation);
@@ -112,12 +112,29 @@ void MyFrame::CreateLayout()
     wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
 
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
-    sidePanel->Add(toggleButton, 0, wxALIGN_RIGHT | wxCENTER, 10);
+    sidePanel->Add(toggleButton, 0, wxCENTER, 10);
 
     wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
     mainSizer->Add(sidePanel, 0, 10 , wxALL);
     mainSizer->Add(m_splitter, 1, wxEXPAND);
     SetSizer(mainSizer);
+
+    CreateStatusBar(2);
+
+    m_timer = new wxTimer(this, wxID_ANY);
+    m_timer->Start(100);
+}
+
+void MyFrame :: onTimer(wxTimerEvent &event){
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor){
+        int pos = currentEditor->GetCurrentPos();
+        int lineNum = currentEditor->LineFromPosition(pos);
+        int col = currentEditor->GetColumn(pos);
+
+        wxString cursor = wxString::Format("Line %d , Column %d", lineNum+1, col+1);
+        SetStatusText(cursor);
+    }
 }
 
 void MyFrame::ToggleSidePanel(wxCommandEvent &event)

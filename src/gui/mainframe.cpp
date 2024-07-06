@@ -109,6 +109,9 @@ void MyFrame::CreateLayout()
     m_splitter->SplitVertically(m_treeCtrl, m_notebook);
     m_splitter->SetMinimumPaneSize(100);
     m_splitter->SetSashPosition(200);
+    m_splitter->Unsplit(m_treeCtrl);
+    m_isSidePanelShown = false;
+
     wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
 
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
@@ -250,6 +253,9 @@ void MyFrame::PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId)
 
         cont = dir.GetNext(&filename);
     }
+    m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+    m_splitter->SetSashPosition(200);
+    m_isSidePanelShown = true;
 }
 
 void MyFrame::OnTreeItemActivated(wxTreeEvent &event)

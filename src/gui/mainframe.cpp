@@ -175,7 +175,6 @@ void MyFrame::onTabClose(wxAuiNotebookEvent &event)
 
     wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
     int tabCount = m_notebook->GetPageCount();
-    // wxMessageBox(wxString::Format("Current tab count: %d", tabCount), "Tab Count", wxOK | wxICON_INFORMATION);
 
     UpdateTitle(tabCount - 1); // - 1 because while updating the count it stays at 1 for some reason even if last of tab has been closed
 }
@@ -280,17 +279,6 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
 
 void MyFrame::UpdateTitle()
 {
-    // if (m_notebook->GetPageCount() < 1)
-    // {
-    //     SetTitle("CodeLite");
-    // }
-    // else
-    // {
-    //     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
-    //     SetTitle(title + " - CodeLite");
-    // }
-    // wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
-    // SetTitle(title + " - CodeLite");
     int currentPage = m_notebook->GetSelection();
     if (currentPage != wxNOT_FOUND)
     {
@@ -309,11 +297,6 @@ void MyFrame::UpdateTitle(int count)
     {
         SetTitle("CodeLite");
     }
-    // else
-    // {
-    //     wxString title = m_currentFile.IsEmpty() ? "Untitled" : wxFileName(m_currentFile).GetFullName();
-    //     SetTitle(title + " - CodeLite");
-    // }
 }
 
 void MyFrame::OnNewFile(wxCommandEvent &event)

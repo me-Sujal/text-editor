@@ -54,6 +54,7 @@ private:
     Editor *GetCurrentEditor();
     wxString m_rootPath;
     wxString m_currentFile;
+    wxStaticText *m_cursorPosition;
 };
 
 // Menu item IDs

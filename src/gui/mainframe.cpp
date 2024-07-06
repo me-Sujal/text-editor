@@ -114,35 +114,46 @@ void MyFrame::CreateLayout()
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
     sidePanel->Add(toggleButton, 0, wxCENTER, 10);
 
-    wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(sidePanel, 0, 10 , wxALL);
+    m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
+    sidePanel->Add(m_cursorPosition, 1, wxCENTER, 10);
+
+    wxBoxSizer *cursorPosition = new wxBoxSizer(wxHORIZONTAL);
+
+    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     mainSizer->Add(m_splitter, 1, wxEXPAND);
+    mainSizer->Add(sidePanel, 0, 10, wxALL);
     SetSizer(mainSizer);
 
-    CreateStatusBar(2);
+    // CreateStatusBar(2);
 
     m_timer = new wxTimer(this, wxID_ANY);
     m_timer->Start(100);
 }
 
-void MyFrame :: onTimer(wxTimerEvent &event){
+void MyFrame ::onTimer(wxTimerEvent &event)
+{
     Editor *currentEditor = GetCurrentEditor();
-    if (currentEditor){
+    if (currentEditor)
+    {
         int pos = currentEditor->GetCurrentPos();
         int lineNum = currentEditor->LineFromPosition(pos);
         int col = currentEditor->GetColumn(pos);
 
-        wxString cursor = wxString::Format("Line %d , Column %d", lineNum+1, col+1);
-        SetStatusText(cursor);
+        wxString cursor = wxString::Format("Line %d , Column %d", lineNum + 1, col + 1);
+        m_cursorPosition->SetLabel(cursor);
     }
 }
 
+
 void MyFrame::ToggleSidePanel(wxCommandEvent &event)
 {
-    if (m_isSidePanelShown){
+    if (m_isSidePanelShown)
+    {
         m_splitter->Unsplit(m_treeCtrl);
         m_isSidePanelShown = false;
-    } else {
+    }
+    else
+    {
         m_splitter->SplitVertically(m_treeCtrl, m_notebook);
         m_splitter->SetSashPosition(200);
         m_isSidePanelShown = true;

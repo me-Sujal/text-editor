@@ -117,14 +117,16 @@ void MyFrame::CreateLayout()
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
     sidePanel->Add(toggleButton, 0, wxCENTER, 10);
 
-    m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
-    sidePanel->Add(m_cursorPosition, 1, wxCENTER, 10);
+    // m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
+    // sidePanel->Add(m_cursorPosition, 1, wxCENTER, 10);
+
+    CreateStatusBar(2);
 
     wxBoxSizer *cursorPosition = new wxBoxSizer(wxHORIZONTAL);
 
-    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
-    mainSizer->Add(m_splitter, 1, wxEXPAND);
+    wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
     mainSizer->Add(sidePanel, 0, 10, wxALL);
+    mainSizer->Add(m_splitter, 1, wxEXPAND);
     SetSizer(mainSizer);
 
     // CreateStatusBar(2);
@@ -143,7 +145,8 @@ void MyFrame ::onTimer(wxTimerEvent &event)
         int col = currentEditor->GetColumn(pos);
 
         wxString cursor = wxString::Format("Line %d , Column %d", lineNum + 1, col + 1);
-        m_cursorPosition->SetLabel(cursor);
+        // m_cursorPosition->SetLabel(cursor);
+        SetStatusText(cursor);
     }
 }
 

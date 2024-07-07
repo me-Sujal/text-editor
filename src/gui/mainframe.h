@@ -46,6 +46,7 @@ private:
     void onTimer(wxTimerEvent &event);
     wxString GetItemPath(wxTreeItemId itemId);
 
+
     wxTimer *m_timer;
     wxAuiNotebook *m_notebook;
     std::vector<Editor *> m_editors;

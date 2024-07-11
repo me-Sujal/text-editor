@@ -1,9 +1,12 @@
 #include "mainframe.h"
 #include "../utils/file_utils.h"
 #include <wx/utils.h>
+#include <wx/fdrepdlg.h>
+#include <wx/srchctrl.h>
 
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
-    : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500))
+    : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500)),
+    m_findReplaceDialog(nullptr)
 {
     CreateLayout();
     CreateMenuBar();
@@ -50,6 +53,11 @@ void MyFrame::CreateMenuBar()
     editMenu->Append(wxID_UNDO, "&Undo\tCtrl+Z");
     editMenu->Append(wxID_REDO, "&Redo\tCtrl+Y");
     menuBar->Append(editMenu, "&Edit");
+    editMenu->AppendSeparator();
+    editMenu->Append(ID_Find, "&Find\tCtrl+F");
+    editMenu->Append(ID_Replace, "&Replace\tCtrl+H");
+    editMenu->Append(ID_FindNext, "Find &Next\tF3");
+    editMenu->Append(ID_FindPrevious, "Find &Previous\tShift+F3");
 
     // Help menu
     wxMenu *helpMenu = new wxMenu();
@@ -86,6 +94,16 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MyFrame::OnWrap, this, ID_Wrap);
     Bind(wxEVT_BUTTON, &MyFrame::ToggleSidePanel, this, ID_ToggleButton);
     Bind(wxEVT_TIMER, &MyFrame::onTimer, this);
+
+    Bind(wxEVT_MENU, &MyFrame::OnFind, this, ID_Find);
+    Bind(wxEVT_MENU, &MyFrame::OnReplace, this, ID_Replace);
+    Bind(wxEVT_MENU, &MyFrame::OnFindNext, this, ID_FindNext);
+    Bind(wxEVT_MENU, &MyFrame::OnFindPrevious, this, ID_FindPrevious);
+    Bind(wxEVT_FIND, &MyFrame::OnFindDialogFind, this);
+    Bind(wxEVT_FIND_NEXT, &MyFrame::OnFindDialogFind, this);
+    Bind(wxEVT_FIND_REPLACE, &MyFrame::OnFindDialogReplace, this);
+    Bind(wxEVT_FIND_REPLACE_ALL, &MyFrame::OnFindDialogReplaceAll, this);
+    Bind(wxEVT_FIND_CLOSE, &MyFrame::OnFindDialogClose, this);
 
     // // Help menu
     // Bind(wxEVT_MENU, &MyFrame::OnDocumentation, this, ID_Documentation);
@@ -143,6 +161,23 @@ void MyFrame::CreateLayout()
 
     m_timer = new wxTimer(this, wxID_ANY);
     m_timer->Start(100);
+
+    m_searchCtrl = new wxSearchCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
+    m_searchCtrl->ShowSearchButton(true);
+    m_searchCtrl->ShowCancelButton(true);
+    sidePanel->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
+
+    wxBoxSizer* replaceSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_replaceCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(150, -1));
+    wxButton* replaceButton = new wxButton(this, wxID_ANY, "Replace", wxDefaultPosition, wxSize(50, -1));
+    replaceSizer->Add(m_replaceCtrl, 1, wxEXPAND | wxRIGHT, 5);
+    replaceSizer->Add(replaceButton, 0, wxEXPAND);
+    sidePanel->Add(replaceSizer, 0, wxEXPAND | wxALL, 5);
+
+    m_searchCtrl->Bind(wxEVT_COMMAND_TEXT_ENTER, &MyFrame::OnSearchCtrl, this);
+    m_searchCtrl->Bind(wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN, &MyFrame::OnSearchCtrl, this);
+
+    replaceButton->Bind(wxEVT_BUTTON, &MyFrame::OnReplaceSidePanel, this);
 }
 
 void MyFrame ::onTimer(wxTimerEvent &event)
@@ -430,7 +465,224 @@ void MyFrame::OnRedo(wxCommandEvent &event)
         currentEditor->Redo();
     }
 }
+void MyFrame::CreateFindReplaceDialog()
+{
+    if (!m_findReplaceDialog)
+    {
+        m_findReplaceDialog = new wxFindReplaceDialog(
+            this,
+            &m_findReplaceData,
+            "Find and Replace",
+            wxFR_REPLACEDIALOG | wxFR_NOUPDOWN | wxFR_NOWHOLEWORD | wxFR_NOMATCHCASE
+        );
+    }
+    m_findReplaceDialog->Show(true);
+}
 
+void MyFrame::OnFind(wxCommandEvent &event)
+{
+    CreateFindReplaceDialog();
+}
+
+void MyFrame::OnReplace(wxCommandEvent &event)
+{
+    CreateFindReplaceDialog();
+}
+
+void MyFrame::OnFindNext(wxCommandEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        wxString findString = m_findReplaceData.GetFindString();
+        if (!findString.IsEmpty())
+        {
+            int flags = 0;
+            if (m_findReplaceData.GetFlags() & wxFR_MATCHCASE)
+                flags |= wxSTC_FIND_MATCHCASE;
+
+            int currentPos = currentEditor->GetCurrentPos();
+            int length = currentEditor->GetLength();
+            int found = currentEditor->FindText(currentPos, length, findString, flags);
+
+            if (found != wxNOT_FOUND)
+            {
+                currentEditor->SetSelection(found, found + findString.Length());
+                currentEditor->EnsureCaretVisible();
+            }
+        }
+    }
+}
+
+void MyFrame::OnFindPrevious(wxCommandEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        wxString findString = m_findReplaceData.GetFindString();
+        if (!findString.IsEmpty())
+        {
+            int flags = 0;
+            if (m_findReplaceData.GetFlags() & wxFR_MATCHCASE)
+                flags |= wxSTC_FIND_MATCHCASE;
+
+            int currentPos = currentEditor->GetCurrentPos();
+            int found = currentEditor->FindText(currentPos, 0, findString, flags);
+
+            if (found != wxNOT_FOUND)
+            {
+                currentEditor->SetSelection(found, found + findString.Length());
+                currentEditor->EnsureCaretVisible();
+            }
+        }
+    }
+}
+
+void MyFrame::OnFindDialogFind(wxFindDialogEvent &event)
+{
+    Editor* currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        wxString findString = event.GetFindString();
+        int flags = 0;
+        if (event.GetFlags() & wxFR_MATCHCASE)
+            flags |= wxSTC_FIND_MATCHCASE;
+
+        int currentPos = currentEditor->GetCurrentPos();
+        int length = currentEditor->GetLength();
+        int found = currentEditor->FindText(currentPos, length, findString, flags);
+
+        if (found != wxNOT_FOUND)
+        {
+            currentEditor->SetSelection(found, found + findString.Length());
+            currentEditor->EnsureCaretVisible();
+        }
+    }
+}
+
+void MyFrame::OnFindDialogReplace(wxFindDialogEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        wxString findString = event.GetFindString();
+        wxString replaceString = event.GetReplaceString();
+        int flags = 0;
+        if (event.GetFlags() & wxFR_MATCHCASE)
+            flags |= wxSTC_FIND_MATCHCASE;
+
+        int currentPos = currentEditor->GetCurrentPos();
+        int length = currentEditor->GetLength();
+        int found = currentEditor->FindText(currentPos, length, findString, flags);
+
+        if (found != wxNOT_FOUND)
+        {
+            currentEditor->SetSelection(found, found + findString.Length());
+            currentEditor->ReplaceSelection(replaceString);
+            currentEditor->SetSelection(found, found + replaceString.Length());
+            currentEditor->EnsureCaretVisible();
+        }
+    }
+}
+
+void MyFrame::OnFindDialogReplaceAll(wxFindDialogEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (currentEditor)
+    {
+        wxString findString = event.GetFindString();
+        wxString replaceString = event.GetReplaceString();
+        int flags = 0;
+        if (event.GetFlags() & wxFR_MATCHCASE)
+            flags |= wxSTC_FIND_MATCHCASE;
+
+        int count = 0;
+        int found = 0;
+        do
+        {
+            found = currentEditor->FindText(found, currentEditor->GetLength(), findString, flags);
+            if (found != wxNOT_FOUND)
+            {
+                currentEditor->SetTargetStart(found);
+                currentEditor->SetTargetEnd(found + findString.Length());
+                currentEditor->ReplaceTarget(replaceString);
+                found += replaceString.Length();
+                count++;
+            }
+        } while (found != wxNOT_FOUND);
+
+        wxMessageBox(wxString::Format("Replaced %d occurrences", count), "Replace All");
+    }
+}
+
+void MyFrame::OnFindDialogClose(wxFindDialogEvent &event)
+{
+    m_findReplaceDialog->Destroy();
+    m_findReplaceDialog = nullptr;
+}
+void MyFrame::OnSearchCtrl(wxCommandEvent &event)
+{
+    wxString searchString = m_searchCtrl->GetValue();
+    if (!searchString.IsEmpty())
+    {
+        Editor *currentEditor = GetCurrentEditor();
+        if (currentEditor)
+        {
+            int flags = 0;
+            int currentPos = currentEditor->GetCurrentPos();
+            int length = currentEditor->GetLength();
+            int found = currentEditor->FindText(currentPos, length, searchString, flags);
+
+            if (found != wxNOT_FOUND)
+            {
+                currentEditor->SetSelection(found, found + searchString.Length());
+                currentEditor->EnsureCaretVisible();
+            }
+            else
+            {
+                // If not found from current position, search from the beginning
+                found = currentEditor->FindText(0, length, searchString, flags);
+                if (found != wxNOT_FOUND)
+                {
+                    currentEditor->SetSelection(found, found + searchString.Length());
+                    currentEditor->EnsureCaretVisible();
+                }
+                else
+                {
+                    wxMessageBox("Text not found", "Search Result", wxOK | wxICON_INFORMATION);
+                }
+            }
+        }
+    }
+}
+void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
+{
+    wxString searchString = m_searchCtrl->GetValue();
+    wxString replaceString = m_replaceCtrl->GetValue();
+    if (!searchString.IsEmpty())
+    {
+        Editor *currentEditor = GetCurrentEditor();
+        if (currentEditor)
+        {
+            int flags = 0;
+            int currentPos = currentEditor->GetCurrentPos();
+            int length = currentEditor->GetLength();
+            int found = currentEditor->FindText(currentPos, length, searchString, flags);
+
+            if (found != wxNOT_FOUND)
+            {
+                currentEditor->SetSelection(found, found + searchString.Length());
+                currentEditor->ReplaceSelection(replaceString);
+                currentEditor->SetSelection(found, found + replaceString.Length());
+                currentEditor->EnsureCaretVisible();
+            }
+            else
+            {
+                wxMessageBox("Text not found", "Replace Result", wxOK | wxICON_INFORMATION);
+            }
+        }
+    }
+}
 MyFrame::~MyFrame()
 {
     for (Editor *editor : m_editors)

@@ -185,7 +185,6 @@ void MyFrame ::onTimer(wxTimerEvent &event)
     }
 }
 
-
 void MyFrame::ToggleSidePanel(wxCommandEvent &event)
 {
     if (m_isSidePanelShown)
@@ -223,12 +222,12 @@ void MyFrame::CreateTab(const wxString &filename)
 void MyFrame::onTabClose(wxAuiNotebookEvent &event)
 {
     int index = event.GetSelection();
-    event.Skip();
 
     wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
     int tabCount = m_notebook->GetPageCount();
 
     UpdateTitle(tabCount - 1); // - 1 because while updating the count it stays at 1 for some reason even if last of tab has been closed
+    event.Skip();
 }
 
 void MyFrame::onCloseTabCleanup(wxCommandEvent &event)
@@ -673,9 +672,9 @@ void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
 }
 MyFrame::~MyFrame()
 {
-    m_editors.clear();
     for (Editor *editor : m_editors)
     {
         delete editor;
     }
+    m_editors.clear();
 }

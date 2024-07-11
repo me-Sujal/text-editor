@@ -3,7 +3,7 @@
 ZoomPopup::ZoomPopup(wxWindow *parent, wxWindow *button, std::function<void(int)> updateZoomCallback)
     : wxPopupWindow(parent), m_updateZoomCallback(updateZoomCallback), m_currentZoom(0), m_button(button), m_shown(false)
 {
-    CreateContent(); // Remove 'button' parameter here
+    CreateContent();
 }
 void ZoomPopup::CreateContent()
 {

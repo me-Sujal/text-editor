@@ -66,7 +66,30 @@ void Editor::SetupStyles()
     // To make sure style is refreshed and also without this the background color of text is not as same as editor
     StyleClearAll();
 
+}
+int Editor::FindText(int start, int end, const wxString &text, int flags)
+{
+    return wxStyledTextCtrl::FindText(start, end, text, flags);
+}
 
+void Editor::ReplaceSelection(const wxString &text)
+{
+    wxStyledTextCtrl::ReplaceSelection(text);
+}
+
+void Editor::SetTargetStart(int pos)
+{
+    wxStyledTextCtrl::SetTargetStart(pos);
+}
+
+void Editor::SetTargetEnd(int pos)
+{
+    wxStyledTextCtrl::SetTargetEnd(pos);
+}
+
+void Editor::ReplaceTarget(const wxString &text)
+{
+    wxStyledTextCtrl::ReplaceTarget(text);
 }
 // void Editor::Cut()
 // {

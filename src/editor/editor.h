@@ -9,6 +9,11 @@ public:
            const wxPoint &pos = wxDefaultPosition,
            const wxSize &size = wxDefaultSize,
            long style = 0);
+    int FindText(int start, int end, const wxString& text, int flags);
+    void ReplaceSelection(const wxString& text);
+    void SetTargetStart(int pos);
+    void SetTargetEnd(int pos);
+    void ReplaceTarget(const wxString& text);
     // void Cut();
     // void Copy();
     // void Paste();

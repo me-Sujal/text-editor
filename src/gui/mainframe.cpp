@@ -6,7 +6,7 @@
 
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500)),
-    m_findReplaceDialog(nullptr)
+      m_findReplaceDialog(nullptr)
 {
     CreateLayout();
     CreateMenuBar();
@@ -167,9 +167,9 @@ void MyFrame::CreateLayout()
     m_searchCtrl->ShowCancelButton(true);
     sidePanel->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
 
-    wxBoxSizer* replaceSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *replaceSizer = new wxBoxSizer(wxHORIZONTAL);
     m_replaceCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(150, -1));
-    wxButton* replaceButton = new wxButton(this, wxID_ANY, "Replace", wxDefaultPosition, wxSize(50, -1));
+    wxButton *replaceButton = new wxButton(this, wxID_ANY, "Replace", wxDefaultPosition, wxSize(50, -1));
     replaceSizer->Add(m_replaceCtrl, 1, wxEXPAND | wxRIGHT, 5);
     replaceSizer->Add(replaceButton, 0, wxEXPAND);
     sidePanel->Add(replaceSizer, 0, wxEXPAND | wxALL, 5);
@@ -473,8 +473,7 @@ void MyFrame::CreateFindReplaceDialog()
             this,
             &m_findReplaceData,
             "Find and Replace",
-            wxFR_REPLACEDIALOG | wxFR_NOUPDOWN | wxFR_NOWHOLEWORD | wxFR_NOMATCHCASE
-        );
+            wxFR_REPLACEDIALOG | wxFR_NOUPDOWN | wxFR_NOWHOLEWORD | wxFR_NOMATCHCASE);
     }
     m_findReplaceDialog->Show(true);
 }
@@ -540,7 +539,7 @@ void MyFrame::OnFindPrevious(wxCommandEvent &event)
 
 void MyFrame::OnFindDialogFind(wxFindDialogEvent &event)
 {
-    Editor* currentEditor = GetCurrentEditor();
+    Editor *currentEditor = GetCurrentEditor();
     if (currentEditor)
     {
         wxString findString = event.GetFindString();
@@ -620,6 +619,7 @@ void MyFrame::OnFindDialogClose(wxFindDialogEvent &event)
     m_findReplaceDialog->Destroy();
     m_findReplaceDialog = nullptr;
 }
+
 void MyFrame::OnSearchCtrl(wxCommandEvent &event)
 {
     wxString searchString = m_searchCtrl->GetValue();
@@ -655,9 +655,11 @@ void MyFrame::OnSearchCtrl(wxCommandEvent &event)
         }
     }
 }
+
 void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
 {
     wxString searchString = m_searchCtrl->GetValue();
+    // wxString searchString = "me";
     wxString replaceString = m_replaceCtrl->GetValue();
     if (!searchString.IsEmpty())
     {
@@ -701,7 +703,7 @@ void MyFrame::OnZoomButtonClick(wxCommandEvent &event)
     if (!m_zoomPopup)
     {
         m_zoomPopup = new ZoomPopup(this, m_zoomButton, [this, currentEditor](int zoom)
-        {
+                                    {
             if (zoom < 8 ||  zoom > -8)
            { 
             currentEditor->SetZoom(zoom*10);
@@ -710,8 +712,7 @@ void MyFrame::OnZoomButtonClick(wxCommandEvent &event)
             
             else {
                 return;
-            }
-        });
+            } });
     }
 
     if (m_zoomPopup->IsShown())

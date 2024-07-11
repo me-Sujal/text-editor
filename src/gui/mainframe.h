@@ -7,13 +7,12 @@
 #include <wx/aui/auibook.h>
 #include "../editor/editor.h"
 #include <vector>
-<<<<<<< HEAD
 #include "../popups/popups.h"
-=======
 #include <wx/fdrepdlg.h>
-#include <wx/srchctrl.h>
 
->>>>>>> 24f9771fc3c894b828807381c5eccd7ab6dc5701
+#include <wx/srchctrl.h> // for windows system
+#include <wx/gtk/srchctrl.h>//for ubuntu system 
+
 class MyFrame : public wxFrame
 {
 public:
@@ -76,18 +75,15 @@ private:
     wxString m_currentFile;
     wxStaticText *m_cursorPosition;
 
-<<<<<<< HEAD
     wxButton *m_zoomButton;
     void OnZoomButtonClick(wxCommandEvent &event);
     void UpdateZoom(int zoom);
 
     ZoomPopup *m_zoomPopup;
-=======
     wxFindReplaceDialog *m_findReplaceDialog;
     wxFindReplaceData m_findReplaceData;
     wxSearchCtrl *m_searchCtrl;
-    wxTextCtrl* m_replaceCtrl;
->>>>>>> 24f9771fc3c894b828807381c5eccd7ab6dc5701
+    wxTextCtrl *m_replaceCtrl;
 };
 
 // Menu item IDs

@@ -69,7 +69,7 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MyFrame::OnNewWindow, this, ID_NewWindow);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFile, this, ID_OpenFile);
     Bind(wxEVT_MENU, &MyFrame::OnOpenFolder, this, ID_OpenFolder);
-  
+
     Bind(wxEVT_MENU, &MyFrame::OnUndo, this, wxID_UNDO);
     Bind(wxEVT_MENU, &MyFrame::OnRedo, this, wxID_REDO);
     // Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
@@ -95,13 +95,14 @@ void MyFrame::BindEventHandlers()
 
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &MyFrame::onTabClose, this);
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CHANGED, &MyFrame::OnTabChange, this);
+    Bind(wxEVT_BUTTON, &MyFrame::OnZoomButtonClick, this, m_zoomButton->GetId());
 }
 
 void MyFrame::CreateLayout()
 {
     m_splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
 
-    m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE );
+    m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE);
 
     // m_Editor = new Editor(m_splitter);
     m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS | wxAUI_NB_WINDOWLIST_BUTTON | wxAUI_NB_SCROLL_BUTTONS);
@@ -120,7 +121,16 @@ void MyFrame::CreateLayout()
     // m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
     // sidePanel->Add(m_cursorPosition, 1, wxCENTER, 10);
 
-    CreateStatusBar(2);
+    CreateStatusBar(3);
+    m_zoomButton = new wxButton(GetStatusBar(), wxID_ANY, "Zoom: 0", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+
+    int width[3] = {-1, -2, 100};
+    GetStatusBar()->SetStatusWidths(3, width);
+
+    wxRect rect;
+    GetStatusBar()->GetFieldRect(2, rect);
+    m_zoomButton->SetPosition(rect.GetPosition());
+    m_zoomButton->SetSize(rect.GetSize());
 
     wxBoxSizer *cursorPosition = new wxBoxSizer(wxHORIZONTAL);
 
@@ -336,7 +346,10 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
         return;
 
     wxString filePath = openFileDialog.GetPath();
-
+    if (m_notebook->GetCurrentPage() == 0)
+    {
+        CreateTab();
+    }
     CreateTab(filePath);
 }
 
@@ -425,4 +438,38 @@ MyFrame::~MyFrame()
         delete editor;
     }
     m_editors.clear();
+}
+
+void MyFrame::OnZoomButtonClick(wxCommandEvent &event)
+{
+    Editor *currentEditor = GetCurrentEditor();
+    if (!currentEditor || !m_zoomButton)
+        return;
+
+    if (!m_zoomPopup)
+    {
+        m_zoomPopup = new ZoomPopup(this, m_zoomButton, [this, currentEditor](int zoom)
+        {
+            if (zoom < 8 ||  zoom > -8)
+           { 
+            currentEditor->SetZoom(zoom*10);
+            UpdateZoom(zoom); 
+            }
+            
+            else {
+                return;
+            }
+        });
+    }
+
+    if (m_zoomPopup->IsShown())
+        m_zoomPopup->Dismiss();
+    else
+        m_zoomPopup->Popup();
+}
+
+void MyFrame::UpdateZoom(int zoom)
+{
+    int level = zoom;
+    m_zoomButton->SetLabel(wxString::Format("Zoom: %d", level));
 }

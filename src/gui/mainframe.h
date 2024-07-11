@@ -7,7 +7,7 @@
 #include <wx/aui/auibook.h>
 #include "../editor/editor.h"
 #include <vector>
-
+#include "../popups/popups.h"
 class MyFrame : public wxFrame
 {
 public:
@@ -56,6 +56,12 @@ private:
     wxString m_rootPath;
     wxString m_currentFile;
     wxStaticText *m_cursorPosition;
+
+    wxButton *m_zoomButton;
+    void OnZoomButtonClick(wxCommandEvent &event);
+    void UpdateZoom(int zoom);
+
+    ZoomPopup *m_zoomPopup;
 };
 
 // Menu item IDs

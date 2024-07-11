@@ -18,6 +18,7 @@ set(SOURCE_FILES
     src/editor/editor.cpp
     src/gui/mainframe.cpp
     src/utils/file_utils.cpp
+    src/popups/popups.cpp
     # Add other .cpp files if you have any
 )
 

@@ -516,7 +516,7 @@ void MyFrame::CreateFindReplaceDialog()
             this,
             &m_findReplaceData,
             "Find and Replace",
-            wxFR_REPLACEDIALOG | wxFR_NOUPDOWN | wxFR_NOWHOLEWORD | wxFR_NOMATCHCASE);
+            wxFR_REPLACEDIALOG);
     }
     m_findReplaceDialog->Show(true);
 }
@@ -589,8 +589,11 @@ void MyFrame::OnFindDialogFind(wxFindDialogEvent &event)
 
     wxString findString = event.GetFindString();
     int flags = 0;
+    if (event.GetFlags() & wxFR_WHOLEWORD)
+        flags |= wxSTC_FIND_WHOLEWORD;
     if (event.GetFlags() & wxFR_MATCHCASE)
         flags |= wxSTC_FIND_MATCHCASE;
+    wxLogDebug("Search flags: %d", flags);
 
     int startPos = (event.GetEventType() == wxEVT_FIND) ? 0 : currentEditor->GetCurrentPos();
     int length = currentEditor->GetLength();
@@ -616,9 +619,11 @@ void MyFrame::OnFindDialogReplace(wxFindDialogEvent &event)
     wxString findString = event.GetFindString();
     wxString replaceString = event.GetReplaceString();
     int flags = 0;
+    if (event.GetFlags() & wxFR_WHOLEWORD)
+        flags |= wxSTC_FIND_WHOLEWORD;
     if (event.GetFlags() & wxFR_MATCHCASE)
         flags |= wxSTC_FIND_MATCHCASE;
-
+    wxLogDebug("Search flags: %d", flags);
     // Check if the current selection matches the find string
     wxString selectedText = currentEditor->GetSelectedText();
     if (selectedText.IsSameAs(findString, (flags & wxSTC_FIND_MATCHCASE) == 0))
@@ -651,8 +656,11 @@ void MyFrame::OnFindDialogReplaceAll(wxFindDialogEvent &event)
         wxString findString = event.GetFindString();
         wxString replaceString = event.GetReplaceString();
         int flags = 0;
+        if (event.GetFlags() & wxFR_WHOLEWORD)
+            flags |= wxSTC_FIND_WHOLEWORD;
         if (event.GetFlags() & wxFR_MATCHCASE)
             flags |= wxSTC_FIND_MATCHCASE;
+        wxLogDebug("Search flags: %d", flags);
 
         int count = 0;
         int found = 0;

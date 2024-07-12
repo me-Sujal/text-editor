@@ -9,9 +9,8 @@
 #include <vector>
 #include "../popups/popups.h"
 #include <wx/fdrepdlg.h>
-
-#include <wx/srchctrl.h> // for windows system
-#include <wx/gtk/srchctrl.h>//for ubuntu system 
+#include <wx/srchctrl.h>
+#include <wx/gtk/srchctrl.h>
 
 class MyFrame : public wxFrame
 {
@@ -55,7 +54,7 @@ private:
     void CreateTab(const wxString &filename = wxEmptyString);
     void onTabClose(wxAuiNotebookEvent &event);
     void UpdateTitle();
-    void UpdateTitle(int Count);//overloaded function
+    void UpdateTitle(int Count); // overloaded function
     void OnTabChange(wxAuiNotebookEvent &event);
 
     void PopulateTreeWithDirs(const wxString &path, wxTreeItemId parentId);
@@ -63,7 +62,6 @@ private:
     void onCloseTabCleanup(wxCommandEvent &event);
     void onTimer(wxTimerEvent &event);
     wxString GetItemPath(wxTreeItemId itemId);
-
 
     wxTimer *m_timer;
     wxAuiNotebook *m_notebook;
@@ -102,7 +100,7 @@ enum
     ID_Wrap,
     ID_Documentation,
     ID_About,
-    ID_CLOSE_TAB_CLEANUP, 
+    ID_CLOSE_TAB_CLEANUP,
     ID_ToggleButton,
     ID_Find,
     ID_Replace,

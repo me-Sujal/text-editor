@@ -108,6 +108,10 @@ void MyFrame::BindEventHandlers()
     // Search control events
     m_searchCtrl->Bind(wxEVT_COMMAND_TEXT_ENTER, &MyFrame::OnSearchCtrl, this);
     m_searchCtrl->Bind(wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN, &MyFrame::OnSearchCtrl, this);
+    Bind(wxEVT_FIND, &MyFrame::OnFindDialogFind, this);
+    Bind(wxEVT_FIND_NEXT, &MyFrame::OnFindDialogFind, this);
+    Bind(wxEVT_FIND_REPLACE, &MyFrame::OnFindDialogReplace, this);
+    Bind(wxEVT_FIND_REPLACE_ALL, &MyFrame::OnFindDialogReplaceAll, this);
 }
 
 void MyFrame::CreateLayout()
@@ -576,50 +580,66 @@ void MyFrame::OnFindPrevious(wxCommandEvent &event)
     }
 }
 
+
 void MyFrame::OnFindDialogFind(wxFindDialogEvent &event)
 {
     Editor *currentEditor = GetCurrentEditor();
-    if (currentEditor)
+    if (!currentEditor)
+        return;
+
+    wxString findString = event.GetFindString();
+    int flags = 0;
+    if (event.GetFlags() & wxFR_MATCHCASE)
+        flags |= wxSTC_FIND_MATCHCASE;
+
+    int startPos = (event.GetEventType() == wxEVT_FIND) ? 0 : currentEditor->GetCurrentPos();
+    int length = currentEditor->GetLength();
+    int found = currentEditor->FindText(startPos, length, findString, flags);
+
+    if (found != wxNOT_FOUND)
     {
-        wxString findString = event.GetFindString();
-        int flags = 0;
-        if (event.GetFlags() & wxFR_MATCHCASE)
-            flags |= wxSTC_FIND_MATCHCASE;
-
-        int currentPos = currentEditor->GetCurrentPos();
-        int length = currentEditor->GetLength();
-        int found = currentEditor->FindText(currentPos, length, findString, flags);
-
-        if (found != wxNOT_FOUND)
-        {
-            currentEditor->SetSelection(found, found + findString.Length());
-            currentEditor->EnsureCaretVisible();
-        }
+        currentEditor->SetSelection(found, found + findString.Length());
+        currentEditor->EnsureCaretVisible();
+    }
+    else
+    {
+        wxMessageBox("Text not found", "Find", wxOK | wxICON_INFORMATION);
     }
 }
 
 void MyFrame::OnFindDialogReplace(wxFindDialogEvent &event)
 {
     Editor *currentEditor = GetCurrentEditor();
-    if (currentEditor)
+    if (!currentEditor)
+        return;
+
+    wxString findString = event.GetFindString();
+    wxString replaceString = event.GetReplaceString();
+    int flags = 0;
+    if (event.GetFlags() & wxFR_MATCHCASE)
+        flags |= wxSTC_FIND_MATCHCASE;
+
+    // Check if the current selection matches the find string
+    wxString selectedText = currentEditor->GetSelectedText();
+    if (selectedText.IsSameAs(findString, (flags & wxSTC_FIND_MATCHCASE) == 0))
     {
-        wxString findString = event.GetFindString();
-        wxString replaceString = event.GetReplaceString();
-        int flags = 0;
-        if (event.GetFlags() & wxFR_MATCHCASE)
-            flags |= wxSTC_FIND_MATCHCASE;
+        // Replace the current selection
+        currentEditor->ReplaceSelection(replaceString);
+    }
 
-        int currentPos = currentEditor->GetCurrentPos();
-        int length = currentEditor->GetLength();
-        int found = currentEditor->FindText(currentPos, length, findString, flags);
+    // Find the next occurrence
+    int currentPos = currentEditor->GetCurrentPos();
+    int length = currentEditor->GetLength();
+    int found = currentEditor->FindText(currentPos, length, findString, flags);
 
-        if (found != wxNOT_FOUND)
-        {
-            currentEditor->SetSelection(found, found + findString.Length());
-            currentEditor->ReplaceSelection(replaceString);
-            currentEditor->SetSelection(found, found + replaceString.Length());
-            currentEditor->EnsureCaretVisible();
-        }
+    if (found != wxNOT_FOUND)
+    {
+        currentEditor->SetSelection(found, found + findString.Length());
+        currentEditor->EnsureCaretVisible();
+    }
+    else
+    {
+        wxMessageBox("No more occurrences found", "Replace", wxOK | wxICON_INFORMATION);
     }
 }
 
@@ -668,7 +688,7 @@ void MyFrame::OnSearchCtrl(wxCommandEvent &event)
         if (currentEditor)
         {
             int flags = 0;
-            int currentPos = currentEditor->GetCurrentPos();
+            int currentPos = currentEditor->GetCurrentPos() - 1;
             int length = currentEditor->GetLength();
             int found = currentEditor->FindText(currentPos, length, searchString, flags);
 
@@ -698,7 +718,6 @@ void MyFrame::OnSearchCtrl(wxCommandEvent &event)
 void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
 {
     wxString searchString = m_searchCtrl->GetValue();
-    // wxString searchString = "me";
     wxString replaceString = m_replaceCtrl->GetValue();
     if (!searchString.IsEmpty())
     {
@@ -708,13 +727,27 @@ void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
             int flags = 0;
             int currentPos = currentEditor->GetCurrentPos();
             int length = currentEditor->GetLength();
-            int found = currentEditor->FindText(currentPos, length, searchString, flags);
+            int found = currentEditor->FindText(0, length, searchString, flags);
 
             if (found != wxNOT_FOUND)
             {
-                currentEditor->SetSelection(found, found + searchString.Length());
-                currentEditor->ReplaceSelection(replaceString);
-                currentEditor->SetSelection(found, found + replaceString.Length());
+                // Replace the current occurrence
+                currentEditor->SetTargetStart(found);
+                currentEditor->SetTargetEnd(found + searchString.Length());
+                currentEditor->ReplaceTarget(replaceString);
+
+                // Move to the end of the replaced text
+                currentEditor->GotoPos(found + replaceString.Length());
+
+                // Search for the next occurrence
+                int nextFound = currentEditor->FindText(found + replaceString.Length(), length, searchString, flags);
+
+                if (nextFound != wxNOT_FOUND)
+                {
+                    // Select the next occurrence
+                    currentEditor->SetSelection(nextFound, nextFound + searchString.Length());
+                }
+
                 currentEditor->EnsureCaretVisible();
             }
             else

@@ -9,6 +9,7 @@
 #include <vector>
 #include "../popups/popups.h"
 #include <wx/fdrepdlg.h>
+
 #include <wx/srchctrl.h>
 #include <wx/gtk/srchctrl.h>
 
@@ -20,12 +21,14 @@ public:
 
 private:
     bool m_isWrapEnabled = false;
-    bool m_isSidePanelShown = true;
+    bool m_isSidePanelShown = false;
+    bool m_isSearchEnabled = false;
     wxMenuItem *m_wrapMenuItem = nullptr;
     void CreateMenuBar();
     void CreateLayout();
     void BindEventHandlers();
     void ToggleSidePanel(wxCommandEvent &event);
+    void ToggleSearch(wxCommandEvent &event);
 
     void OnNewFile(wxCommandEvent &event);
     void OnNewWindow(wxCommandEvent &event);
@@ -69,10 +72,12 @@ private:
     std::vector<Editor *> m_editors;
     wxTreeCtrl *m_treeCtrl;
     wxSplitterWindow *m_splitter;
+    wxPanel *m_searchPane1;
     Editor *GetCurrentEditor();
     wxString m_rootPath;
     wxString m_currentFile;
     wxStaticText *m_cursorPosition;
+
 
     wxButton *m_zoomButton;
     void OnZoomButtonClick(wxCommandEvent &event);
@@ -103,6 +108,7 @@ enum
     ID_About,
     ID_CLOSE_TAB_CLEANUP,
     ID_ToggleButton,
+    ID_ShowSearch,
     ID_Find,
     ID_Replace,
     ID_FindNext,

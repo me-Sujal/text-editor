@@ -99,6 +99,7 @@ void MyFrame::BindEventHandlers()
 
     // UI and Layout events
     Bind(wxEVT_BUTTON, &MyFrame::ToggleSidePanel, this, ID_ToggleButton);
+    Bind(wxEVT_BUTTON, &MyFrame::ToggleSearch, this, ID_ShowSearch);
     Bind(wxEVT_TIMER, &MyFrame::onTimer, this);
     m_treeCtrl->Bind(wxEVT_TREE_ITEM_ACTIVATED, &MyFrame::OnTreeItemActivated, this);
     m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &MyFrame::onTabClose, this);
@@ -122,19 +123,17 @@ void MyFrame::CreateLayout()
 
     m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS | wxAUI_NB_WINDOWLIST_BUTTON | wxAUI_NB_SCROLL_BUTTONS);
 
-    m_splitter->SplitVertically(m_treeCtrl, m_notebook);
-
-    m_splitter->SetMinimumPaneSize(100);
-
-    m_splitter->SetSashPosition(200);
-
-    m_splitter->Unsplit(m_treeCtrl);
-
-    m_isSidePanelShown = false;
+    m_searchPane1 = new wxPanel(m_splitter, wxID_ANY);
+    m_searchPane1->SetMinSize(wxSize(200, -1));
+    m_searchPane1->SetBackgroundColour(wxColour(255, 0, 0));
+    wxStaticBoxSizer *searchSizer = new wxStaticBoxSizer(wxVERTICAL, m_searchPane1);
 
     wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
+    wxButton *showSearchButton = new wxButton(this, ID_ShowSearch, wxT("Show search"));
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
-    sidePanel->Add(toggleButton, 0, wxEXPAND | wxALL, 5);
+
+    sidePanel->Add(toggleButton, 0, wxALL, 5);
+    sidePanel->Add(showSearchButton, 0, wxALL, 5);
 
     wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
     m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
@@ -152,21 +151,37 @@ void MyFrame::CreateLayout()
 
     SetSizer(mainSizer);
 
+
     m_timer = new wxTimer(this, wxID_ANY);
     m_timer->Start(100);
 
     // NEED TO ADD THIS TO THE SPLITTER AS WELL
-    m_searchCtrl = new wxSearchCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
+    m_searchCtrl = new wxSearchCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
     m_searchCtrl->ShowSearchButton(true);
     m_searchCtrl->ShowCancelButton(true);
-    sidePanel->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
+    // sidePanel->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
+    searchSizer->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
 
     wxBoxSizer *replaceSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_replaceCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(150, -1));
-    wxButton *replaceButton = new wxButton(this, wxID_ANY, "Replace", wxDefaultPosition, wxSize(50, -1));
+    m_replaceCtrl = new wxTextCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(150, -1));
+    wxButton *replaceButton = new wxButton(m_searchPane1, wxID_ANY, "Replace", wxDefaultPosition, wxSize(50, -1));
     replaceSizer->Add(m_replaceCtrl, 1, wxEXPAND | wxRIGHT, 5);
     replaceSizer->Add(replaceButton, 0, wxEXPAND);
-    sidePanel->Add(replaceSizer, 0, wxEXPAND | wxALL, 5);
+    // sidePanel->Add(replaceSizer, 0, wxEXPAND | wxALL, 5);
+    searchSizer->Add(replaceSizer, 0, wxEXPAND | wxALL, 5);
+
+    m_searchPane1->SetSizer(searchSizer);
+    m_searchPane1->Layout();
+
+    m_splitter->SplitVertically(m_searchPane1, m_notebook);
+
+    m_splitter->SetMinimumPaneSize(100);
+
+    m_splitter->SetSashPosition(200);
+
+    m_splitter->Unsplit(m_searchPane1);
+
+    m_isSidePanelShown = false;
 
     m_searchCtrl->Bind(wxEVT_COMMAND_TEXT_ENTER, &MyFrame::OnSearchCtrl, this);
     m_searchCtrl->Bind(wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN, &MyFrame::OnSearchCtrl, this);
@@ -426,6 +441,19 @@ void MyFrame::UpdateZoom(int zoom)
     m_zoomButton->SetLabel(wxString::Format("Zoom: %d", level));
 }
 
+void MyFrame::ToggleSearch(wxCommandEvent &event){
+    if (!m_isSearchEnabled)
+    {
+        m_splitter->SplitVertically(m_searchPane1, m_notebook);
+        m_splitter->SetSashPosition(200);
+        m_isSearchEnabled = true;
+    }
+    else
+    {
+        m_splitter->Unsplit(m_searchPane1);
+        m_isSearchEnabled = false;
+    }
+}
 /////////////////////////////////////////////////////////
 
 // Text Editing Operations

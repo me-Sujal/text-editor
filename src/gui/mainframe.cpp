@@ -69,6 +69,12 @@ void MyFrame::CreateMenuBar()
     themeMenu->AppendRadioItem(ID_ThemeDefault, "Default");
     themeMenu->AppendRadioItem(ID_ThemeDark, "Dark");
     themeMenu->AppendRadioItem(ID_ThemeBluishGrey, "Bluish Grey");
+    themeMenu->AppendRadioItem(ID_ThemeSolarizedLight, "Solarized Light");
+    themeMenu->AppendRadioItem(ID_ThemeSolarizedDark, "Solarized Dark");
+    themeMenu->AppendRadioItem(ID_ThemeMonokai, "Monokai");
+    themeMenu->AppendRadioItem(ID_ThemeDracula, "Dracula");
+    themeMenu->AppendRadioItem(ID_ThemeGitHubLight, "GitHub Light");
+    themeMenu->AppendRadioItem(ID_ThemeNord, "Nord");
     menuBar->Append(themeMenu, "&Theme");
 
     // Help menu
@@ -108,8 +114,15 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_FIND_CLOSE, &MyFrame::OnFindDialogClose, this);
 
     // Theme bindings
-    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeDefault, ID_ThemeBluishGrey);
-
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeDefault);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeDark);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeBluishGrey);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeSolarizedLight);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeSolarizedDark);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeMonokai);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeDracula);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeGitHubLight);
+    Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeNord);
     // UI and Layout events
     Bind(wxEVT_BUTTON, &MyFrame::ToggleSidePanel, this, ID_ToggleButton);
     Bind(wxEVT_TIMER, &MyFrame::onTimer, this);

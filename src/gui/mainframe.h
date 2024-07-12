@@ -113,5 +113,11 @@ enum
     ID_FindPrevious,
     ID_ThemeDefault,
     ID_ThemeDark,
-    ID_ThemeBluishGrey
+    ID_ThemeBluishGrey,
+    ID_ThemeSolarizedLight,
+    ID_ThemeSolarizedDark,
+    ID_ThemeMonokai,
+    ID_ThemeDracula,
+    ID_ThemeGitHubLight,
+    ID_ThemeNord
 };

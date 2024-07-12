@@ -120,46 +120,42 @@ void MyFrame::CreateLayout()
 
     m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE);
 
-    // m_Editor = new Editor(m_splitter);
     m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS | wxAUI_NB_WINDOWLIST_BUTTON | wxAUI_NB_SCROLL_BUTTONS);
 
     m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+
     m_splitter->SetMinimumPaneSize(100);
+
     m_splitter->SetSashPosition(200);
+
     m_splitter->Unsplit(m_treeCtrl);
+
     m_isSidePanelShown = false;
 
     wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
-
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
-    sidePanel->Add(toggleButton, 0, wxCENTER, 10);
+    sidePanel->Add(toggleButton, 0, wxEXPAND | wxALL, 5);
 
-    // m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
-    // sidePanel->Add(m_cursorPosition, 1, wxCENTER, 10);
+    wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
+    bottomSizer->Add(m_cursorPosition, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+    m_zoomButton = new wxButton(this, wxID_ANY, "Zoom: 0", wxDefaultPosition, wxSize(100, -1), wxBU_EXACTFIT);
+    bottomSizer->Add(m_zoomButton, 0, wxALIGN_CENTER_VERTICAL, 5);
 
-    CreateStatusBar(3);
-    m_zoomButton = new wxButton(GetStatusBar(), wxID_ANY, "Zoom: 0", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    m_subSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_subSizer->Add(sidePanel, 0, wxEXPAND);
+    m_subSizer->Add(m_splitter, 1, wxEXPAND);
 
-    int width[3] = {-1, -2, 100};
-    GetStatusBar()->SetStatusWidths(3, width);
+    wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(m_subSizer, 1, wxEXPAND);
+    mainSizer->Add(bottomSizer, 0, wxEXPAND);
 
-    wxRect rect;
-    GetStatusBar()->GetFieldRect(2, rect);
-    m_zoomButton->SetPosition(rect.GetPosition());
-    m_zoomButton->SetSize(rect.GetSize());
-
-    wxBoxSizer *cursorPosition = new wxBoxSizer(wxHORIZONTAL);
-
-    wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
-    mainSizer->Add(sidePanel, 0, 10, wxALL);
-    mainSizer->Add(m_splitter, 1, wxEXPAND);
     SetSizer(mainSizer);
-
-    // CreateStatusBar(2);
 
     m_timer = new wxTimer(this, wxID_ANY);
     m_timer->Start(100);
 
+    // NEED TO ADD THIS TO THE SPLITTER AS WELL
     m_searchCtrl = new wxSearchCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
     m_searchCtrl->ShowSearchButton(true);
     m_searchCtrl->ShowCancelButton(true);
@@ -174,10 +170,9 @@ void MyFrame::CreateLayout()
 
     m_searchCtrl->Bind(wxEVT_COMMAND_TEXT_ENTER, &MyFrame::OnSearchCtrl, this);
     m_searchCtrl->Bind(wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN, &MyFrame::OnSearchCtrl, this);
-
     replaceButton->Bind(wxEVT_BUTTON, &MyFrame::OnReplaceSidePanel, this);
+    ////////////////////////////////////////////////////////
 }
-// .................................................
 
 // File operations
 void MyFrame::OnNewFile(wxCommandEvent &event)
@@ -261,7 +256,7 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
     return wxFileName(m_rootPath, path).GetFullPath();
 }
 
-//..................................................
+/////////////////////////////////////////////////////////
 
 //Tab Management ...................................
 
@@ -339,8 +334,7 @@ void MyFrame::UpdateTitle(int count)
     }
 }
 
-// .................................................
-
+////////////////////////////////////////////////////////
 // UI and Layout Management
 
 void MyFrame ::onTimer(wxTimerEvent &event)
@@ -353,8 +347,8 @@ void MyFrame ::onTimer(wxTimerEvent &event)
         int col = currentEditor->GetColumn(pos);
 
         wxString cursor = wxString::Format("Line %d , Column %d", lineNum + 1, col + 1);
-        // m_cursorPosition->SetLabel(cursor);
-        SetStatusText(cursor);
+        m_cursorPosition->SetLabel(cursor);
+        // SetStatusText(cursor);
     }
 }
 
@@ -432,7 +426,7 @@ void MyFrame::UpdateZoom(int zoom)
     m_zoomButton->SetLabel(wxString::Format("Zoom: %d", level));
 }
 
-// ...........................................................
+/////////////////////////////////////////////////////////
 
 // Text Editing Operations
 
@@ -503,7 +497,7 @@ void MyFrame::OnRedo(wxCommandEvent &event)
     }
 }
 
-// ...........................................................
+//////////////////////////////////////////////////////////////
 
 
 // Find and Replace Operations...............................
@@ -766,7 +760,7 @@ void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
     }
 }
 
-// ............................................................
+////////////////////////////////////////////////////////////////
 
 // Utility Functions...........................................
 
@@ -781,7 +775,7 @@ Editor *MyFrame::GetCurrentEditor()
     return nullptr;
 }
 
-// ...............................................................
+////////////////////////////////////////////////////////////////
 
 // Destructor..................................................
 MyFrame::~MyFrame()

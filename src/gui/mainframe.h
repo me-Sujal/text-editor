@@ -65,6 +65,7 @@ private:
 
     wxTimer *m_timer;
     wxAuiNotebook *m_notebook;
+    wxBoxSizer *m_subSizer;
     std::vector<Editor *> m_editors;
     wxTreeCtrl *m_treeCtrl;
     wxSplitterWindow *m_splitter;

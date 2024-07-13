@@ -154,8 +154,7 @@ void MyFrame::CreateLayout()
 
     m_searchPane1 = new wxPanel(m_splitter, wxID_ANY);
     m_searchPane1->SetMinSize(wxSize(200, -1));
-    m_searchPane1->SetBackgroundColour(wxColour(255, 0, 0));
-    wxStaticBoxSizer *searchSizer = new wxStaticBoxSizer(wxVERTICAL, m_searchPane1);
+    wxBoxSizer *searchSizer = new wxBoxSizer(wxVERTICAL);
 
     wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
     wxButton *showSearchButton = new wxButton(this, ID_ShowSearch, wxT("Show search"));
@@ -202,14 +201,16 @@ void MyFrame::CreateLayout()
     m_searchPane1->SetSizer(searchSizer);
     m_searchPane1->Layout();
 
-    m_splitter->SplitVertically(m_searchPane1, m_notebook);
+    m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+    m_splitter->ReplaceWindow(m_treeCtrl, m_searchPane1);
 
-    m_splitter->SetMinimumPaneSize(100);
-
-    m_splitter->SetSashPosition(200);
-
+    // Hide panel initially
+    m_searchPane1->Hide();
+    m_treeCtrl->Hide();
     m_splitter->Unsplit(m_searchPane1);
 
+    m_isSidePanelShown = false;
+    m_isSearchEnabled = false;
     m_isSidePanelShown = false;
 
     m_searchCtrl->Bind(wxEVT_COMMAND_TEXT_ENTER, &MyFrame::OnSearchCtrl, this);
@@ -413,20 +414,6 @@ void MyFrame ::onTimer(wxTimerEvent &event)
     }
 }
 
-void MyFrame::ToggleSidePanel(wxCommandEvent &event)
-{
-    if (m_isSidePanelShown)
-    {
-        m_splitter->Unsplit(m_treeCtrl);
-        m_isSidePanelShown = false;
-    }
-    else
-    {
-        m_splitter->SplitVertically(m_treeCtrl, m_notebook);
-        m_splitter->SetSashPosition(200);
-        m_isSidePanelShown = true;
-    }
-}
 
 void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
 {
@@ -487,18 +474,93 @@ void MyFrame::UpdateZoom(int zoom)
     m_zoomButton->SetLabel(wxString::Format("Zoom: %d", level));
 }
 
-void MyFrame::ToggleSearch(wxCommandEvent &event){
+// void MyFrame::ToggleSearch(wxCommandEvent &event){
+//     if (!m_isSearchEnabled)
+//     {
+//         m_splitter->SplitVertically(m_searchPane1, m_notebook);
+//         m_splitter->SetSashPosition(200);
+//         m_isSearchEnabled = true;
+//     }
+//     else
+//     {
+//         m_splitter->Unsplit(m_searchPane1);
+//         m_isSearchEnabled = false;
+//     }
+// }
+
+// void MyFrame::ToggleSidePanel(wxCommandEvent &event)
+// {
+//     if (m_isSidePanelShown)
+//     {
+//         m_splitter->Unsplit(m_treeCtrl);
+//         m_isSidePanelShown = false;
+//     }
+//     else
+//     {
+//         m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+//         m_splitter->SetSashPosition(200);
+//         m_isSidePanelShown = true;
+//     }
+// }
+
+void MyFrame::ToggleSidePanel(wxCommandEvent &event)
+{
+    if (m_isSidePanelShown)
+    {
+        m_splitter->Unsplit(m_treeCtrl);
+        m_isSidePanelShown = false;
+
+        // If search was enabled, show it
+        if (m_isSearchEnabled)
+        {
+            m_splitter->SplitVertically(m_searchPane1, m_notebook);
+            m_searchPane1->Show();
+        }
+    }
+    else
+    {
+        if (m_isSearchEnabled)
+        {
+            m_searchPane1->Hide();
+            m_isSearchEnabled = false;
+        }
+        m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+        m_isSidePanelShown = true;
+    }
+    m_splitter->SetSashPosition(200);
+    Layout();
+}
+
+void MyFrame::ToggleSearch(wxCommandEvent &event)
+{
     if (!m_isSearchEnabled)
     {
-        m_splitter->SplitVertically(m_searchPane1, m_notebook);
-        m_splitter->SetSashPosition(200);
+        if (m_isSidePanelShown)
+        {
+            m_splitter->ReplaceWindow(m_treeCtrl, m_searchPane1);
+            m_isSidePanelShown = false;
+        }
+        else
+        {
+            m_splitter->SplitVertically(m_searchPane1, m_notebook);
+        }
+        m_searchPane1->Show();
         m_isSearchEnabled = true;
     }
     else
     {
         m_splitter->Unsplit(m_searchPane1);
+        m_searchPane1->Hide();
         m_isSearchEnabled = false;
+
+        // If side panel was shown before, show it again
+        if (m_isSidePanelShown)
+        {
+            m_splitter->SplitVertically(m_treeCtrl, m_notebook);
+        }
     }
+    m_splitter->SetSashPosition(200);
+    Layout();
 }
 /////////////////////////////////////////////////////////
 
@@ -934,7 +996,6 @@ void MyFrame::HideWelcomePage()
         m_notebook->RemovePage(welcomePageIndex);
     }
 }
-
 
 ////////////////////////////////////////////////////////////////
 

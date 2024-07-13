@@ -1,9 +1,6 @@
 #pragma once
 #include "../Themes/themes.h"
-<<<<<<< HEAD
-=======
 #include"../Welcome/welcome_page.h"
->>>>>>> ed118501eeddaf42ab3e4aa021cbc544041ddf76
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>

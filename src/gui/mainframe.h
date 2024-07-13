@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../themes/themes.h"
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
@@ -11,7 +11,7 @@
 #include <wx/fdrepdlg.h>
 
 #include <wx/srchctrl.h>
-#include <wx/gtk/srchctrl.h>
+
 
 class MyFrame : public wxFrame
 {
@@ -53,6 +53,10 @@ private:
     void OnReplaceSidePanel(wxCommandEvent &event);
 
     void OnSearchCtrl(wxCommandEvent &event);
+
+    int m_currentThemeIndex;
+    void ApplyTheme(const Theme& theme);
+    void OnChangeTheme(wxCommandEvent& event);
 
     void CreateTab(const wxString &filename = wxEmptyString);
     void onTabClose(wxAuiNotebookEvent &event);
@@ -112,5 +116,14 @@ enum
     ID_Find,
     ID_Replace,
     ID_FindNext,
-    ID_FindPrevious
+    ID_FindPrevious,
+    ID_ThemeDefault,
+    ID_ThemeDark,
+    ID_ThemeBluishGrey,
+    ID_ThemeSolarizedLight,
+    ID_ThemeSolarizedDark,
+    ID_ThemeMonokai,
+    ID_ThemeDracula,
+    ID_ThemeGitHubLight,
+    ID_ThemeNord
 };

@@ -56,16 +56,26 @@ void Editor::SetupEditor()
 
 void Editor::SetupStyles()
 {
-    // style for entire editor
-    StyleSetForeground(wxSTC_STYLE_DEFAULT, wxColour(200, 200, 200)); // style for the editor background
-    StyleSetBackground(wxSTC_STYLE_DEFAULT, wxColour(30, 30, 30));       // style for the editor text
-    SetCaretForeground(wxColour(255, 255, 255));
-    StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(75, 75, 75)); // style for line number
-    StyleSetBackground(wxSTC_STYLE_LINENUMBER, wxColour(35, 35, 35));
+    // These will be overwritten by the theme, but set defaults just in case
+    wxColour defaultBackground = wxColour(255, 255, 255);
+    wxColour defaultForeground = wxColour(0, 0, 0);
+    wxColour defaultLineNumBg = wxColour(240, 240, 240);
+    wxColour defaultLineNumFg = wxColour(100, 100, 100);
 
-    // To make sure style is refreshed and also without this the background color of text is not as same as editor
+    StyleSetForeground(wxSTC_STYLE_DEFAULT, defaultForeground);
+    StyleSetBackground(wxSTC_STYLE_DEFAULT, defaultBackground);
+    StyleSetForeground(wxSTC_STYLE_LINENUMBER, defaultLineNumFg);
+    StyleSetBackground(wxSTC_STYLE_LINENUMBER, defaultLineNumBg);
+
+    SetCaretForeground(defaultForeground);
+
+    // Increase line number margin width and add a separator
+    SetMarginWidth(0, 50);
+    SetMarginType(1, wxSTC_MARGIN_FORE);
+    SetMarginWidth(1, 1);
+    StyleSetForeground(1, wxColour(200, 200, 200));
+
     StyleClearAll();
-
 }
 int Editor::FindText(int start, int end, const wxString &text, int flags)
 {

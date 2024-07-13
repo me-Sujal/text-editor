@@ -14,11 +14,11 @@ public:
     void SetTargetStart(int pos);
     void SetTargetEnd(int pos);
     void ReplaceTarget(const wxString& text);
-    // void Cut();
-    // void Copy();
-    // void Paste();
-    // void Undo();
-    // void Redo();
+    void Cut();
+    void Copy();
+    void Paste();
+    void Undo();
+    void Redo();
 
 private:
     void SetupEditor();

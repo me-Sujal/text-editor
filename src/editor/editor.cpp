@@ -101,33 +101,33 @@ void Editor::ReplaceTarget(const wxString &text)
 {
     wxStyledTextCtrl::ReplaceTarget(text);
 }
-// void Editor::Cut()
-// {
-//     wxStyledTextCtrl::Cut();
-// }
+void Editor::Cut()
+{
+    wxStyledTextCtrl::Cut();
+}
 
-// void Editor::Copy()
-// {
-//     wxStyledTextCtrl::Copy();
-// }
+void Editor::Copy()
+{
+    wxStyledTextCtrl::Copy();
+}
 
-// void Editor::Paste()
-// {
-//     wxStyledTextCtrl::Paste();
-// }
+void Editor::Paste()
+{
+    wxStyledTextCtrl::Paste();
+}
 
-// void Editor::Undo()
-// {
-//     if (CanUndo())
-//     {
-//         wxStyledTextCtrl::Undo();
-//     }
-// }
+void Editor::Undo()
+{
+    if (CanUndo())
+    {
+        wxStyledTextCtrl::Undo();
+    }
+}
 
-// void Editor::Redo()
-// {
-//     if (CanRedo())
-//     {
-//         wxStyledTextCtrl::Redo();
-//     }
-// }
+void Editor::Redo()
+{
+    if (CanRedo())
+    {
+        wxStyledTextCtrl::Redo();
+    }
+}

@@ -478,35 +478,6 @@ void MyFrame::UpdateZoom(int zoom)
     m_zoomButton->SetLabel(wxString::Format("Zoom: %d", level));
 }
 
-// void MyFrame::ToggleSearch(wxCommandEvent &event){
-//     if (!m_isSearchEnabled)
-//     {
-//         m_splitter->SplitVertically(m_searchPane1, m_notebook);
-//         m_splitter->SetSashPosition(200);
-//         m_isSearchEnabled = true;
-//     }
-//     else
-//     {
-//         m_splitter->Unsplit(m_searchPane1);
-//         m_isSearchEnabled = false;
-//     }
-// }
-
-// void MyFrame::ToggleSidePanel(wxCommandEvent &event)
-// {
-//     if (m_isSidePanelShown)
-//     {
-//         m_splitter->Unsplit(m_treeCtrl);
-//         m_isSidePanelShown = false;
-//     }
-//     else
-//     {
-//         m_splitter->SplitVertically(m_treeCtrl, m_notebook);
-//         m_splitter->SetSashPosition(200);
-//         m_isSidePanelShown = true;
-//     }
-// }
-
 void MyFrame::ToggleSidePanel(wxCommandEvent &event)
 {
     if (m_isSidePanelShown)
@@ -926,13 +897,15 @@ void MyFrame::ApplyTheme(const Theme& theme)
         wxColour lineNumBg = theme.lineNumberBackground;
         wxColour lineNumFg = theme.lineNumberForeground;
 
+
         // Ensure enough contrast
         if (theme.name == "Dark" || theme.name == "Bluish Grey") {
-            lineNumBg = theme.background.ChangeLightness(110); // Slightly lighter than background
+            // lineNumBg = theme.background.ChangeLightness(110); // Slightly lighter than background
+            lineNumBg = wxColor(255, 0, 0);
             lineNumFg = wxColour(200, 200, 200); // Light grey for better visibility
         }
 
-        editor->StyleSetBackground(wxSTC_STYLE_LINENUMBER, lineNumBg);
+        editor->StyleSetBackground(wxSTC_STYLE_LINENUMBER, theme.lineNumberBackground);
         editor->StyleSetForeground(wxSTC_STYLE_LINENUMBER, lineNumFg);
 
         // Ensure line numbers are visible
@@ -974,6 +947,8 @@ void MyFrame::ApplyTheme(const Theme& theme)
     m_searchCtrl->SetForegroundColour(theme.foreground);
     m_replaceCtrl->SetBackgroundColour(theme.lineNumberBackground);
     m_replaceCtrl->SetForegroundColour(theme.foreground);
+
+    m_welcomePage->SetBackgroundColour(theme.background);
 
     // If you have a status bar:
     if (GetStatusBar())

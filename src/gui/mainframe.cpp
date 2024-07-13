@@ -1,5 +1,6 @@
-#include "../themes/themes.h"
+#include "../Themes/themes.h"
 #include "mainframe.h"
+#include"../Welcome/welcome_page.h"
 #include "../utils/file_utils.h"
 #include <wx/utils.h>
 #include <wx/fdrepdlg.h>
@@ -16,13 +17,15 @@ MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     CreateMenuBar();
     BindEventHandlers();
 
+    m_welcomePage = new WelcomePage(m_notebook);
+
     if (!filepath.IsEmpty())
     {
         CreateTab(filepath);
     }
     else
     {
-        CreateTab();
+        ShowWelcomePage();
     }
 
     Centre();
@@ -218,6 +221,7 @@ void MyFrame::CreateLayout()
 // File operations
 void MyFrame::OnNewFile(wxCommandEvent &event)
 {
+    HideWelcomePage();
     CreateTab();
 }
 
@@ -234,6 +238,7 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
         return;
 
     wxString filePath = openFileDialog.GetPath();
+    HideWelcomePage();
     if (m_notebook->GetCurrentPage() == 0)
     {
         CreateTab();
@@ -301,10 +306,15 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
 
 //Tab Management ...................................
 
-void MyFrame::CreateTab(const wxString &filename)
+void MyFrame::CreateTab(const wxString& filename)
 {
+    if (m_notebook->GetPageCount() == 1 && m_notebook->GetPage(0) == m_welcomePage)
+    {
+        m_notebook->RemovePage(0);
+    }
+
     wxString title = filename.IsEmpty() ? "Untitled" : GetFileName(filename);
-    Editor *newEditor = new Editor(m_notebook);
+    Editor* newEditor = new Editor(m_notebook);
     newEditor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
     m_editors.push_back(newEditor);
     m_notebook->AddPage(newEditor, title, true);
@@ -322,15 +332,23 @@ void MyFrame::CreateTab(const wxString &filename)
     UpdateTitle();
 }
 
-void MyFrame::onTabClose(wxAuiNotebookEvent &event)
+void MyFrame::onTabClose(wxAuiNotebookEvent& event)
 {
     int index = event.GetSelection();
 
     wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
     int tabCount = m_notebook->GetPageCount();
 
-    UpdateTitle(tabCount - 1); // - 1 because while updating the count it stays at 1 for some reason even if last of tab has been closed
-    event.Skip();
+    if (tabCount == 1)  // This is the last tab
+    {
+        ShowWelcomePage();
+        event.Veto();  // Prevent the last tab from closing
+    }
+    else
+    {
+        UpdateTitle(tabCount - 1);
+        event.Skip();
+    }
 }
 
 void MyFrame::onCloseTabCleanup(wxCommandEvent &event)
@@ -899,6 +917,22 @@ void MyFrame::ApplyTheme(const Theme& theme)
 
     // Refresh the entire frame to apply changes
     this->Refresh();
+}
+void MyFrame::ShowWelcomePage()
+{
+    if (m_notebook->GetPageCount() == 0 || m_notebook->GetPageIndex(m_welcomePage) == wxNOT_FOUND)
+    {
+        m_notebook->AddPage(m_welcomePage, "Welcome", true);
+        m_notebook->SetSelection(m_notebook->GetPageCount() - 1);
+    }
+}
+void MyFrame::HideWelcomePage()
+{
+    int welcomePageIndex = m_notebook->GetPageIndex(m_welcomePage);
+    if (welcomePageIndex != wxNOT_FOUND)
+    {
+        m_notebook->RemovePage(welcomePageIndex);
+    }
 }
 
 

@@ -1,5 +1,6 @@
 #pragma once
-#include "../themes/themes.h"
+#include "../Themes/themes.h"
+#include"../Welcome/welcome_page.h"
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
@@ -57,6 +58,10 @@ private:
     int m_currentThemeIndex;
     void ApplyTheme(const Theme& theme);
     void OnChangeTheme(wxCommandEvent& event);
+
+    WelcomePage* m_welcomePage;
+    void ShowWelcomePage();
+    void HideWelcomePage();
 
     void CreateTab(const wxString &filename = wxEmptyString);
     void onTabClose(wxAuiNotebookEvent &event);

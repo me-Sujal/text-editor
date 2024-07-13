@@ -19,12 +19,12 @@ set(SOURCE_FILES
     src/gui/mainframe.cpp
     src/utils/file_utils.cpp
     src/popups/popups.cpp
-    src/themes/themes.cpp
+    src/Themes/themes.cpp
     # Add other .cpp files if you have any
 )
 
 # Create the executablez
-add_executable(${PROJECT_NAME} WIN32 ${SOURCE_FILES} "src/Themes/themes.h" "src/Themes/themes.cpp")
+add_executable(${PROJECT_NAME} WIN32 ${SOURCE_FILES} )
 
 # Link wxWidgets libraries
 target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})

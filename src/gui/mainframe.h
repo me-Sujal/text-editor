@@ -1,5 +1,5 @@
 #pragma once
-#include "../themes/themes.h"
+#include "../Themes/themes.h"
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
@@ -11,6 +11,7 @@
 #include <wx/fdrepdlg.h>
 
 #include <wx/srchctrl.h>
+#include <wx/gtk/srchctrl.h>
 
 
 class MyFrame : public wxFrame

@@ -59,8 +59,8 @@ void Editor::SetupStyles()
     // These will be overwritten by the theme, but set defaults just in case
     wxColour defaultBackground = wxColour(255, 255, 255);
     wxColour defaultForeground = wxColour(0, 0, 0);
-    wxColour defaultLineNumBg = wxColour(240, 240, 240);
-    wxColour defaultLineNumFg = wxColour(100, 100, 100);
+    wxColour defaultLineNumBg = wxColour(255, 255, 255);
+    wxColour defaultLineNumFg = wxColour(0, 0, 0);
 
     StyleSetForeground(wxSTC_STYLE_DEFAULT, defaultForeground);
     StyleSetBackground(wxSTC_STYLE_DEFAULT, defaultBackground);

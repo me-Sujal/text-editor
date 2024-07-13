@@ -1,20 +1,23 @@
+#include "../Themes/themes.h"
 #include "mainframe.h"
+#include"../Welcome/welcome_page.h"
 #include "../utils/file_utils.h"
 #include <wx/utils.h>
 #include <wx/fdrepdlg.h>
 #include <wx/srchctrl.h>
-#include "../Themes/themes.h"
 
-// Initialization and setup .........................
+//Initialization and setup .........................
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500)),
       m_findReplaceDialog(nullptr),
       m_zoomPopup(nullptr),
-      m_currentThemeIndex(0)
+    m_currentThemeIndex(0)
 {
     CreateLayout();
     CreateMenuBar();
     BindEventHandlers();
+
+    m_welcomePage = new WelcomePage(m_notebook);
 
     if (!filepath.IsEmpty())
     {
@@ -22,7 +25,7 @@ MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     }
     else
     {
-        CreateTab();
+        ShowWelcomePage();
     }
 
     Centre();
@@ -65,7 +68,7 @@ void MyFrame::CreateMenuBar()
     editMenu->Append(ID_FindPrevious, "Find &Previous\tShift+F3");
 
     // Theme menu
-    wxMenu *themeMenu = new wxMenu();
+    wxMenu* themeMenu = new wxMenu();
     themeMenu->AppendRadioItem(ID_ThemeDefault, "Default");
     themeMenu->AppendRadioItem(ID_ThemeDark, "Dark");
     themeMenu->AppendRadioItem(ID_ThemeBluishGrey, "Bluish Grey");
@@ -145,17 +148,19 @@ void MyFrame::CreateLayout()
 {
     m_splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
 
-    m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS | wxAUI_NB_WINDOWLIST_BUTTON | wxAUI_NB_SCROLL_BUTTONS);
-
     m_treeCtrl = new wxTreeCtrl(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE);
+
+    m_notebook = new wxAuiNotebook(m_splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE | wxAUI_NB_CLOSE_ON_ALL_TABS | wxAUI_NB_WINDOWLIST_BUTTON | wxAUI_NB_SCROLL_BUTTONS);
 
     m_searchPane1 = new wxPanel(m_splitter, wxID_ANY);
     m_searchPane1->SetMinSize(wxSize(200, -1));
-    wxBoxSizer *searchSizer = new wxBoxSizer(wxVERTICAL);
+    m_searchPane1->SetBackgroundColour(wxColour(255, 0, 0));
+    wxStaticBoxSizer *searchSizer = new wxStaticBoxSizer(wxVERTICAL, m_searchPane1);
 
     wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
     wxButton *showSearchButton = new wxButton(this, ID_ShowSearch, wxT("Show search"));
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
+
     sidePanel->Add(toggleButton, 0, wxALL, 5);
     sidePanel->Add(showSearchButton, 0, wxALL, 5);
 
@@ -174,6 +179,7 @@ void MyFrame::CreateLayout()
     mainSizer->Add(bottomSizer, 0, wxEXPAND);
 
     SetSizer(mainSizer);
+
 
     m_timer = new wxTimer(this, wxID_ANY);
     m_timer->Start(100);
@@ -196,16 +202,11 @@ void MyFrame::CreateLayout()
     m_searchPane1->SetSizer(searchSizer);
     m_searchPane1->Layout();
 
-    // m_splitter->SplitVertically(m_searchPane1, m_notebook);
+    m_splitter->SplitVertically(m_searchPane1, m_notebook);
 
-    // m_splitter->SetMinimumPaneSize(100);
+    m_splitter->SetMinimumPaneSize(100);
 
-    // m_splitter->SetSashPosition(200);
-    m_splitter->SplitVertically(m_treeCtrl, m_notebook);
-    m_splitter->ReplaceWindow(m_treeCtrl, m_searchPane1);
-
-    m_searchPane1->Hide();
-    m_treeCtrl->Hide();
+    m_splitter->SetSashPosition(200);
 
     m_splitter->Unsplit(m_searchPane1);
 
@@ -220,6 +221,7 @@ void MyFrame::CreateLayout()
 // File operations
 void MyFrame::OnNewFile(wxCommandEvent &event)
 {
+    HideWelcomePage();
     CreateTab();
 }
 
@@ -236,6 +238,7 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
         return;
 
     wxString filePath = openFileDialog.GetPath();
+    HideWelcomePage();
     if (m_notebook->GetCurrentPage() == 0)
     {
         CreateTab();
@@ -301,12 +304,17 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
 
 /////////////////////////////////////////////////////////
 
-// Tab Management ...................................
+//Tab Management ...................................
 
-void MyFrame::CreateTab(const wxString &filename)
+void MyFrame::CreateTab(const wxString& filename)
 {
+    if (m_notebook->GetPageCount() == 1 && m_notebook->GetPage(0) == m_welcomePage)
+    {
+        m_notebook->RemovePage(0);
+    }
+
     wxString title = filename.IsEmpty() ? "Untitled" : GetFileName(filename);
-    Editor *newEditor = new Editor(m_notebook);
+    Editor* newEditor = new Editor(m_notebook);
     newEditor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
     m_editors.push_back(newEditor);
     m_notebook->AddPage(newEditor, title, true);
@@ -324,15 +332,23 @@ void MyFrame::CreateTab(const wxString &filename)
     UpdateTitle();
 }
 
-void MyFrame::onTabClose(wxAuiNotebookEvent &event)
+void MyFrame::onTabClose(wxAuiNotebookEvent& event)
 {
     int index = event.GetSelection();
 
     wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
     int tabCount = m_notebook->GetPageCount();
 
-    UpdateTitle(tabCount - 1); // - 1 because while updating the count it stays at 1 for some reason even if last of tab has been closed
-    event.Skip();
+    if (tabCount == 1)  // This is the last tab
+    {
+        ShowWelcomePage();
+        event.Veto();  // Prevent the last tab from closing
+    }
+    else
+    {
+        UpdateTitle(tabCount - 1);
+        event.Skip();
+    }
 }
 
 void MyFrame::onCloseTabCleanup(wxCommandEvent &event)
@@ -397,51 +413,19 @@ void MyFrame ::onTimer(wxTimerEvent &event)
     }
 }
 
-// void MyFrame::ToggleSidePanel(wxCommandEvent &event)
-// {
-//     if (m_isSidePanelShown)
-//     {
-//         m_splitter->Unsplit(m_treeCtrl);
-//         m_isSidePanelShown = false;
-//     }
-//     else
-//     {
-//         m_splitter->SplitVertically(m_treeCtrl, m_notebook);
-//         m_splitter->SetSashPosition(200);
-//         m_isSidePanelShown = true;
-//     }
-// }
-
 void MyFrame::ToggleSidePanel(wxCommandEvent &event)
 {
     if (m_isSidePanelShown)
     {
-        if (m_isSearchEnabled)
-        {
-            // If search is enabled, keep it visible
-            m_splitter->ReplaceWindow(m_treeCtrl, m_searchPane1);
-        }
-        else
-        {
-            m_splitter->Unsplit(m_treeCtrl);
-        }
+        m_splitter->Unsplit(m_treeCtrl);
         m_isSidePanelShown = false;
     }
     else
     {
-        if (m_isSearchEnabled)
-        {
-            // If search is enabled, replace it with tree ctrl
-            m_splitter->ReplaceWindow(m_searchPane1, m_treeCtrl);
-        }
-        else
-        {
-            m_splitter->SplitVertically(m_treeCtrl, m_notebook);
-        }
+        m_splitter->SplitVertically(m_treeCtrl, m_notebook);
         m_splitter->SetSashPosition(200);
         m_isSidePanelShown = true;
     }
-    Layout();
 }
 
 void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
@@ -503,57 +487,19 @@ void MyFrame::UpdateZoom(int zoom)
     m_zoomButton->SetLabel(wxString::Format("Zoom: %d", level));
 }
 
-// void MyFrame::ToggleSearch(wxCommandEvent &event)
-// {
-//     if (!m_isSearchEnabled)
-//     {
-//         m_splitter->SplitVertically(m_searchPane1, m_notebook);
-//         m_splitter->SetSashPosition(200);
-//         m_isSearchEnabled = true;
-//     }
-//     else
-//     {
-//         m_splitter->Unsplit(m_searchPane1);
-//         m_isSearchEnabled = false;
-//     }
-// }
-
-void MyFrame::ToggleSearch(wxCommandEvent &event)
-{
+void MyFrame::ToggleSearch(wxCommandEvent &event){
     if (!m_isSearchEnabled)
     {
-        if (m_isSidePanelShown)
-        {
-            // If side panel is shown, replace it with the search panel
-            m_splitter->ReplaceWindow(m_treeCtrl, m_searchPane1);
-        }
-        else
-        {
-            // If side panel is not shown, just show the search panel
-            m_splitter->SplitVertically(m_searchPane1, m_notebook);
-        }
+        m_splitter->SplitVertically(m_searchPane1, m_notebook);
         m_splitter->SetSashPosition(200);
         m_isSearchEnabled = true;
     }
     else
     {
-        if (m_isSidePanelShown)
-        {
-            // If side panel should be shown, replace search with tree ctrl
-            m_splitter->ReplaceWindow(m_searchPane1, m_treeCtrl);
-        }
-        else
-        {
-            // If neither should be shown, just unsplit
-            m_splitter->Unsplit(m_searchPane1);
-        }
+        m_splitter->Unsplit(m_searchPane1);
         m_isSearchEnabled = false;
     }
-    Layout();
 }
-
-
-
 /////////////////////////////////////////////////////////
 
 // Text Editing Operations
@@ -626,6 +572,7 @@ void MyFrame::OnRedo(wxCommandEvent &event)
 }
 
 //////////////////////////////////////////////////////////////
+
 
 // Find and Replace Operations...............................
 
@@ -700,6 +647,7 @@ void MyFrame::OnFindPrevious(wxCommandEvent &event)
         }
     }
 }
+
 
 void MyFrame::OnFindDialogFind(wxFindDialogEvent &event)
 {
@@ -885,11 +833,20 @@ void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
         }
     }
 }
+void MyFrame::OnChangeTheme(wxCommandEvent& event)
+{
+    int themeId = event.GetId() - ID_ThemeDefault;
+    if (themeId >= 0 && themeId < availableThemes.size())
+    {
+        m_currentThemeIndex = themeId;
+        ApplyTheme(availableThemes[m_currentThemeIndex]);
+    }
+}
 
 // Implement the ApplyTheme method
-void MyFrame::ApplyTheme(const Theme &theme)
+void MyFrame::ApplyTheme(const Theme& theme)
 {
-    for (Editor *editor : m_editors)
+    for (Editor* editor : m_editors)
     {
         // Set the main editor colors
         editor->StyleSetBackground(wxSTC_STYLE_DEFAULT, theme.background);
@@ -903,10 +860,9 @@ void MyFrame::ApplyTheme(const Theme &theme)
         wxColour lineNumFg = theme.lineNumberForeground;
 
         // Ensure enough contrast
-        if (theme.name == "Dark" || theme.name == "Bluish Grey")
-        {
+        if (theme.name == "Dark" || theme.name == "Bluish Grey") {
             lineNumBg = theme.background.ChangeLightness(110); // Slightly lighter than background
-            lineNumFg = wxColour(200, 200, 200);               // Light grey for better visibility
+            lineNumFg = wxColour(200, 200, 200); // Light grey for better visibility
         }
 
         editor->StyleSetBackground(wxSTC_STYLE_LINENUMBER, lineNumBg);
@@ -914,7 +870,7 @@ void MyFrame::ApplyTheme(const Theme &theme)
 
         // Ensure line numbers are visible
         editor->SetMarginType(0, wxSTC_MARGIN_NUMBER);
-        editor->SetMarginWidth(0, 50); // Increase width to 50 pixels
+        editor->SetMarginWidth(0, 50);  // Increase width to 50 pixels
         editor->SetMarginSensitive(0, true);
 
         // Add a separator
@@ -962,16 +918,23 @@ void MyFrame::ApplyTheme(const Theme &theme)
     // Refresh the entire frame to apply changes
     this->Refresh();
 }
-
-void MyFrame::OnChangeTheme(wxCommandEvent &event)
+void MyFrame::ShowWelcomePage()
 {
-    int themeId = event.GetId() - ID_ThemeDefault;
-    if (themeId >= 0 && themeId < availableThemes.size())
+    if (m_notebook->GetPageCount() == 0 || m_notebook->GetPageIndex(m_welcomePage) == wxNOT_FOUND)
     {
-        m_currentThemeIndex = themeId;
-        ApplyTheme(availableThemes[m_currentThemeIndex]);
+        m_notebook->AddPage(m_welcomePage, "Welcome", true);
+        m_notebook->SetSelection(m_notebook->GetPageCount() - 1);
     }
 }
+void MyFrame::HideWelcomePage()
+{
+    int welcomePageIndex = m_notebook->GetPageIndex(m_welcomePage);
+    if (welcomePageIndex != wxNOT_FOUND)
+    {
+        m_notebook->RemovePage(welcomePageIndex);
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////
 
@@ -1005,3 +968,5 @@ MyFrame::~MyFrame()
         m_zoomPopup = nullptr;
     }
 }
+
+

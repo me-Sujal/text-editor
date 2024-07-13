@@ -126,6 +126,10 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeDracula);
     Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeGitHubLight);
     Bind(wxEVT_MENU, &MyFrame::OnChangeTheme, this, ID_ThemeNord);
+
+    // Help Menu bindings
+    Bind(wxEVT_MENU, &MyFrame::onDocumentation, this, ID_Documentation);
+
     // UI and Layout events
     Bind(wxEVT_BUTTON, &MyFrame::ToggleSidePanel, this, ID_ToggleButton);
     Bind(wxEVT_BUTTON, &MyFrame::ToggleSearch, this, ID_ShowSearch);
@@ -904,6 +908,7 @@ void MyFrame::OnChangeTheme(wxCommandEvent& event)
         ApplyTheme(availableThemes[m_currentThemeIndex]);
     }
 }
+///////////////////////////////////////////////
 
 // Implement the ApplyTheme method
 void MyFrame::ApplyTheme(const Theme& theme)
@@ -980,6 +985,7 @@ void MyFrame::ApplyTheme(const Theme& theme)
     // Refresh the entire frame to apply changes
     this->Refresh();
 }
+
 void MyFrame::ShowWelcomePage()
 {
     if (m_notebook->GetPageCount() == 0 || m_notebook->GetPageIndex(m_welcomePage) == wxNOT_FOUND)
@@ -988,6 +994,7 @@ void MyFrame::ShowWelcomePage()
         m_notebook->SetSelection(m_notebook->GetPageCount() - 1);
     }
 }
+
 void MyFrame::HideWelcomePage()
 {
     int welcomePageIndex = m_notebook->GetPageIndex(m_welcomePage);
@@ -998,6 +1005,18 @@ void MyFrame::HideWelcomePage()
 }
 
 ////////////////////////////////////////////////////////////////
+
+//Help functions..............................................
+
+void MyFrame::onDocumentation(wxCommandEvent &event){
+    wxString url = "https://github.com/me-Sujal/text-editor";
+
+    if (!url.IsEmpty())
+    {
+        wxLaunchDefaultBrowser(url);
+    }
+}
+//////////////////////////////////////////////////////////////
 
 // Utility Functions...........................................
 

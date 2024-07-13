@@ -43,6 +43,8 @@ private:
     void OnUndo(wxCommandEvent &event);
     void OnRedo(wxCommandEvent &event);
 
+    void onDocumentation(wxCommandEvent &event);
+
     void CreateFindReplaceDialog();
     void OnFind(wxCommandEvent &event);
     void OnReplace(wxCommandEvent &event);

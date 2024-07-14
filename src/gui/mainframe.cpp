@@ -1,17 +1,19 @@
 #include "../Themes/themes.h"
 #include "mainframe.h"
-#include"../Welcome/welcome_page.h"
+#include "../Welcome/welcome_page.h"
 #include "../utils/file_utils.h"
 #include <wx/utils.h>
 #include <wx/fdrepdlg.h>
 #include <wx/srchctrl.h>
+#include <wx/filename.h>
 
-//Initialization and setup .........................
+
+// Initialization and setup .........................
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500)),
       m_findReplaceDialog(nullptr),
       m_zoomPopup(nullptr),
-    m_currentThemeIndex(0)
+      m_currentThemeIndex(0)
 {
     CreateLayout();
     CreateMenuBar();
@@ -30,7 +32,7 @@ MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
 
     Centre();
     m_currentFile = filepath;
-    ApplyTheme(availableThemes[m_currentThemeIndex]);
+    // ApplyTheme(availableThemes[m_currentThemeIndex]);
 }
 
 void MyFrame::CreateMenuBar()
@@ -68,7 +70,7 @@ void MyFrame::CreateMenuBar()
     editMenu->Append(ID_FindPrevious, "Find &Previous\tShift+F3");
 
     // Theme menu
-    wxMenu* themeMenu = new wxMenu();
+    wxMenu *themeMenu = new wxMenu();
     themeMenu->AppendRadioItem(ID_ThemeDefault, "Default");
     themeMenu->AppendRadioItem(ID_ThemeDark, "Dark");
     themeMenu->AppendRadioItem(ID_ThemeBluishGrey, "Bluish Grey");
@@ -172,6 +174,8 @@ void MyFrame::CreateLayout()
     bottomSizer->Add(m_cursorPosition, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
     m_zoomButton = new wxButton(this, wxID_ANY, "Zoom: 0", wxDefaultPosition, wxSize(100, -1), wxBU_EXACTFIT);
     bottomSizer->Add(m_zoomButton, 0, wxALIGN_CENTER_VERTICAL, 5);
+    m_currentLanguage = new wxStaticText(this, wxID_ANY, "Language : Text");
+    bottomSizer->Add(m_currentLanguage, wxALIGN_CENTER_VERTICAL | wxCenter, 5);
 
     m_subSizer = new wxBoxSizer(wxHORIZONTAL);
     m_subSizer->Add(sidePanel, 0, wxEXPAND);
@@ -182,7 +186,6 @@ void MyFrame::CreateLayout()
     mainSizer->Add(bottomSizer, 0, wxEXPAND);
 
     SetSizer(mainSizer);
-
 
     m_timer = new wxTimer(this, wxID_ANY);
     m_timer->Start(100);
@@ -223,6 +226,7 @@ void MyFrame::CreateLayout()
     ////////////////////////////////////////////////////////
 }
 
+
 // File operations
 void MyFrame::OnNewFile(wxCommandEvent &event)
 {
@@ -243,12 +247,17 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
         return;
 
     wxString filePath = openFileDialog.GetPath();
+
+
+    SetCurrentLanguage();
+
     HideWelcomePage();
     if (m_notebook->GetCurrentPage() == 0)
     {
         CreateTab();
     }
     CreateTab(filePath);
+
 }
 
 void MyFrame::OnOpenFolder(wxCommandEvent &event)
@@ -307,11 +316,51 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
     return wxFileName(m_rootPath, path).GetFullPath();
 }
 
+void MyFrame::SetCurrentLanguage(){
+    Editor *currentEditor = GetCurrentEditor();
+    int currentPage = m_notebook->GetSelection();
+    if (currentPage != wxNOT_FOUND)
+    {
+        wxString pageTitle = m_notebook->GetPageText(currentPage);
+        wxFileName fileName(pageTitle);
+        wxString fileExtension = fileName.GetExt().Lower();
+        wxString language;
+        if (fileExtension == "py")
+        {
+             language = "Python";
+        }
+        else if (fileExtension == "cpp")
+        {
+             language = "C++";
+        }
+        else if (fileExtension == "h" || fileExtension == "c")
+        {
+             language = "C";
+        } else if (fileExtension == "html"){
+            language = "HTML";
+        }
+        else if (fileExtension == "css"){
+            language = "CSS";
+        } else if (fileExtension == "js") {
+            language = "Javascript";
+        }
+         else{
+             language = "Plain Text";
+        }
+        currentEditor->ApplySyntaxHighlighting(fileExtension);
+        m_currentLanguage->SetLabel(wxString::Format("Language: %s", language));
+    }
+    else
+    {
+        m_currentLanguage->SetLabel("Language: Text");
+    }
+}
+
 /////////////////////////////////////////////////////////
 
-//Tab Management ...................................
+// Tab Management ...................................
 
-void MyFrame::CreateTab(const wxString& filename)
+void MyFrame::CreateTab(const wxString &filename)
 {
     if (m_notebook->GetPageCount() == 1 && m_notebook->GetPage(0) == m_welcomePage)
     {
@@ -319,7 +368,7 @@ void MyFrame::CreateTab(const wxString& filename)
     }
 
     wxString title = filename.IsEmpty() ? "Untitled" : GetFileName(filename);
-    Editor* newEditor = new Editor(m_notebook);
+    Editor *newEditor = new Editor(m_notebook);
     newEditor->SetWrapMode(m_isWrapEnabled ? wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
     m_editors.push_back(newEditor);
     m_notebook->AddPage(newEditor, title, true);
@@ -332,22 +381,22 @@ void MyFrame::CreateTab(const wxString& filename)
             newEditor->SetText(content);
         }
     }
-    ApplyTheme(availableThemes[m_currentThemeIndex]);
+    // ApplyTheme(availableThemes[m_currentThemeIndex]);
 
     UpdateTitle();
 }
 
-void MyFrame::onTabClose(wxAuiNotebookEvent& event)
+void MyFrame::onTabClose(wxAuiNotebookEvent &event)
 {
     int index = event.GetSelection();
 
     wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
     int tabCount = m_notebook->GetPageCount();
 
-    if (tabCount == 1)  // This is the last tab
+    if (tabCount == 1) // This is the last tab
     {
         ShowWelcomePage();
-        event.Veto();  // Prevent the last tab from closing
+        event.Veto(); // Prevent the last tab from closing
     }
     else
     {
@@ -375,7 +424,10 @@ void MyFrame::onCloseTabCleanup(wxCommandEvent &event)
 void MyFrame::OnTabChange(wxAuiNotebookEvent &event)
 {
     UpdateTitle();
+    SetCurrentLanguage();
     event.Skip();
+
+    // SetCurrentLanguage();
 }
 
 void MyFrame::UpdateTitle()
@@ -418,7 +470,6 @@ void MyFrame ::onTimer(wxTimerEvent &event)
     }
 }
 
-
 void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
 {
     wxTreeItemId itemId = event.GetItem();
@@ -427,6 +478,7 @@ void MyFrame::OnTreeItemActivated(wxTreeEvent &event)
     if (wxFile::Exists(path))
     {
         CreateTab(path);
+        SetCurrentLanguage();
         UpdateTitle();
     }
     else if (wxDir::Exists(path))
@@ -610,7 +662,6 @@ void MyFrame::OnRedo(wxCommandEvent &event)
 
 //////////////////////////////////////////////////////////////
 
-
 // Find and Replace Operations...............................
 
 void MyFrame::CreateFindReplaceDialog()
@@ -685,7 +736,6 @@ void MyFrame::OnFindPrevious(wxCommandEvent &event)
     }
 }
 
-
 void MyFrame::OnFindDialogFind(wxFindDialogEvent &event)
 {
     Editor *currentEditor = GetCurrentEditor();
@@ -698,7 +748,7 @@ void MyFrame::OnFindDialogFind(wxFindDialogEvent &event)
         flags |= wxSTC_FIND_WHOLEWORD;
     if (event.GetFlags() & wxFR_MATCHCASE)
         flags |= wxSTC_FIND_MATCHCASE;
-    wxLogDebug("Search flags: %d", flags);
+
 
     int startPos = (event.GetEventType() == wxEVT_FIND) ? 0 : currentEditor->GetCurrentPos();
     int length = currentEditor->GetLength();
@@ -728,7 +778,6 @@ void MyFrame::OnFindDialogReplace(wxFindDialogEvent &event)
         flags |= wxSTC_FIND_WHOLEWORD;
     if (event.GetFlags() & wxFR_MATCHCASE)
         flags |= wxSTC_FIND_MATCHCASE;
-    wxLogDebug("Search flags: %d", flags);
     // Check if the current selection matches the find string
     wxString selectedText = currentEditor->GetSelectedText();
     if (selectedText.IsSameAs(findString, (flags & wxSTC_FIND_MATCHCASE) == 0))
@@ -765,7 +814,6 @@ void MyFrame::OnFindDialogReplaceAll(wxFindDialogEvent &event)
             flags |= wxSTC_FIND_WHOLEWORD;
         if (event.GetFlags() & wxFR_MATCHCASE)
             flags |= wxSTC_FIND_MATCHCASE;
-        wxLogDebug("Search flags: %d", flags);
 
         int count = 0;
         int found = 0;
@@ -870,96 +918,97 @@ void MyFrame::OnReplaceSidePanel(wxCommandEvent &event)
         }
     }
 }
-void MyFrame::OnChangeTheme(wxCommandEvent& event)
+
+void MyFrame::OnChangeTheme(wxCommandEvent &event)
 {
     int themeId = event.GetId() - ID_ThemeDefault;
     if (themeId >= 0 && themeId < availableThemes.size())
     {
         m_currentThemeIndex = themeId;
-        ApplyTheme(availableThemes[m_currentThemeIndex]);
+        // ApplyTheme(availableThemes[m_currentThemeIndex]);
     }
 }
 ///////////////////////////////////////////////
 
 // Implement the ApplyTheme method
-void MyFrame::ApplyTheme(const Theme& theme)
-{
-    for (Editor* editor : m_editors)
-    {
-        // Set the main editor colors
-        editor->StyleSetBackground(wxSTC_STYLE_DEFAULT, theme.background);
-        editor->StyleSetForeground(wxSTC_STYLE_DEFAULT, theme.foreground);
-        editor->SetCaretForeground(theme.caretForeground);
-        editor->SetSelBackground(true, theme.selectionBackground);
-        editor->SetSelForeground(true, theme.selectionForeground);
+// void MyFrame::ApplyTheme(const Theme &theme)
+// {
+//     for (Editor *editor : m_editors)
+//     {
+//         // Set the main editor colors
+//         editor->StyleSetBackground(wxSTC_STYLE_DEFAULT, theme.background);
+//         editor->StyleSetForeground(wxSTC_STYLE_DEFAULT, theme.foreground);
+//         editor->SetCaretForeground(theme.caretForeground);
+//         editor->SetSelBackground(true, theme.selectionBackground);
+//         editor->SetSelForeground(true, theme.selectionForeground);
 
-        // Set line number colors with higher contrast
-        wxColour lineNumBg = theme.lineNumberBackground;
-        wxColour lineNumFg = theme.lineNumberForeground;
+//         // Set line number colors with higher contrast
+//         wxColour lineNumBg = theme.lineNumberBackground;
+//         wxColour lineNumFg = theme.lineNumberForeground;
 
+//         // Ensure enough contrast
+//         if (theme.name == "Dark" || theme.name == "Bluish Grey")
+//         {
+//             // lineNumBg = theme.background.ChangeLightness(110); // Slightly lighter than background
+//             lineNumBg = wxColor(255, 0, 0);
+//             lineNumFg = wxColour(200, 200, 200); // Light grey for better visibility
+//         }
 
-        // Ensure enough contrast
-        if (theme.name == "Dark" || theme.name == "Bluish Grey") {
-            // lineNumBg = theme.background.ChangeLightness(110); // Slightly lighter than background
-            lineNumBg = wxColor(255, 0, 0);
-            lineNumFg = wxColour(200, 200, 200); // Light grey for better visibility
-        }
+//         editor->StyleSetBackground(wxSTC_STYLE_LINENUMBER, theme.lineNumberBackground);
+//         editor->StyleSetForeground(wxSTC_STYLE_LINENUMBER, lineNumFg);
 
-        editor->StyleSetBackground(wxSTC_STYLE_LINENUMBER, theme.lineNumberBackground);
-        editor->StyleSetForeground(wxSTC_STYLE_LINENUMBER, lineNumFg);
+//         // Ensure line numbers are visible
+//         editor->SetMarginType(0, wxSTC_MARGIN_NUMBER);
+//         editor->SetMarginWidth(0, 50); // Increase width to 50 pixels
+//         editor->SetMarginSensitive(0, true);
 
-        // Ensure line numbers are visible
-        editor->SetMarginType(0, wxSTC_MARGIN_NUMBER);
-        editor->SetMarginWidth(0, 50);  // Increase width to 50 pixels
-        editor->SetMarginSensitive(0, true);
+//         // Add a separator
+//         editor->SetMarginType(1, wxSTC_MARGIN_FORE);
+//         editor->SetMarginWidth(1, 1);
+//         editor->StyleSetForeground(1, lineNumFg);
 
-        // Add a separator
-        editor->SetMarginType(1, wxSTC_MARGIN_FORE);
-        editor->SetMarginWidth(1, 1);
-        editor->StyleSetForeground(1, lineNumFg);
+//         // Increase line number font size and make bold
+//         wxFont lineNumberFont = editor->StyleGetFont(wxSTC_STYLE_LINENUMBER);
+//         lineNumberFont.SetPointSize(lineNumberFont.GetPointSize() + 2);
+//         lineNumberFont.SetWeight(wxFONTWEIGHT_BOLD);
+//         editor->StyleSetFont(wxSTC_STYLE_LINENUMBER, lineNumberFont);
 
-        // Increase line number font size and make bold
-        wxFont lineNumberFont = editor->StyleGetFont(wxSTC_STYLE_LINENUMBER);
-        lineNumberFont.SetPointSize(lineNumberFont.GetPointSize() + 2);
-        lineNumberFont.SetWeight(wxFONTWEIGHT_BOLD);
-        editor->StyleSetFont(wxSTC_STYLE_LINENUMBER, lineNumberFont);
+//         // Apply the style to all text
+//         editor->StyleClearAll();
 
-        // Apply the style to all text
-        editor->StyleClearAll();
+//         // Refresh the editor to apply changes
+//         editor->Refresh();
+//     }
+//     // Apply theme to the notebook (tab control)
+//     m_notebook->SetBackgroundColour(theme.background);
+//     m_notebook->SetForegroundColour(theme.foreground);
 
-        // Refresh the editor to apply changes
-        editor->Refresh();
-    }
-    // Apply theme to the notebook (tab control)
-    m_notebook->SetBackgroundColour(theme.background);
-    m_notebook->SetForegroundColour(theme.foreground);
+//     // Apply theme to the main frame
+//     this->SetBackgroundColour(theme.background);
+//     this->SetForegroundColour(theme.foreground);
 
-    // Apply theme to the main frame
-    this->SetBackgroundColour(theme.background);
-    this->SetForegroundColour(theme.foreground);
+//     // Apply theme to the tree control (side panel)
+//     m_treeCtrl->SetBackgroundColour(theme.background);
+//     m_treeCtrl->SetForegroundColour(theme.foreground);
 
-    // Apply theme to the tree control (side panel)
-    m_treeCtrl->SetBackgroundColour(theme.background);
-    m_treeCtrl->SetForegroundColour(theme.foreground);
+//     // Apply theme to other UI elements
+//     m_searchCtrl->SetBackgroundColour(theme.lineNumberBackground);
+//     m_searchCtrl->SetForegroundColour(theme.foreground);
+//     m_replaceCtrl->SetBackgroundColour(theme.lineNumberBackground);
+//     m_replaceCtrl->SetForegroundColour(theme.foreground);
 
-    // Apply theme to other UI elements
-    m_searchCtrl->SetBackgroundColour(theme.lineNumberBackground);
-    m_searchCtrl->SetForegroundColour(theme.foreground);
-    m_replaceCtrl->SetBackgroundColour(theme.lineNumberBackground);
-    m_replaceCtrl->SetForegroundColour(theme.foreground);
+//     m_welcomePage->SetBackgroundColour(theme.background);
 
-    m_welcomePage->SetBackgroundColour(theme.background);
+//     // If you have a status bar:
+//     if (GetStatusBar())
+//     {
+//         GetStatusBar()->SetBackgroundColour(theme.background);
+//         GetStatusBar()->SetForegroundColour(theme.foreground);
+//     }
 
-    // If you have a status bar:
-    if (GetStatusBar())
-    {
-        GetStatusBar()->SetBackgroundColour(theme.background);
-        GetStatusBar()->SetForegroundColour(theme.foreground);
-    }
-
-    // Refresh the entire frame to apply changes
-    this->Refresh();
-}
+//     // Refresh the entire frame to apply changes
+//     this->Refresh();
+// }
 
 void MyFrame::ShowWelcomePage()
 {
@@ -981,9 +1030,10 @@ void MyFrame::HideWelcomePage()
 
 ////////////////////////////////////////////////////////////////
 
-//Help functions..............................................
+// Help functions..............................................
 
-void MyFrame::onDocumentation(wxCommandEvent &event){
+void MyFrame::onDocumentation(wxCommandEvent &event)
+{
     wxString url = "https://github.com/me-Sujal/text-editor";
 
     if (!url.IsEmpty())
@@ -1023,5 +1073,3 @@ MyFrame::~MyFrame()
         m_zoomPopup = nullptr;
     }
 }
-
-

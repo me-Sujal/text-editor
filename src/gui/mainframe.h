@@ -59,7 +59,7 @@ private:
     void OnSearchCtrl(wxCommandEvent &event);
 
     int m_currentThemeIndex;
-    void ApplyTheme(const Theme& theme);
+    // void ApplyTheme(const Theme& theme);
     void OnChangeTheme(wxCommandEvent& event);
 
     WelcomePage* m_welcomePage;
@@ -76,6 +76,7 @@ private:
     void OnTreeItemActivated(wxTreeEvent &event);
     void onCloseTabCleanup(wxCommandEvent &event);
     void onTimer(wxTimerEvent &event);
+    void SetCurrentLanguage();
     wxString GetItemPath(wxTreeItemId itemId);
 
     wxTimer *m_timer;
@@ -89,7 +90,7 @@ private:
     wxString m_rootPath;
     wxString m_currentFile;
     wxStaticText *m_cursorPosition;
-
+    wxStaticText *m_currentLanguage;
 
     wxButton *m_zoomButton;
     void OnZoomButtonClick(wxCommandEvent &event);

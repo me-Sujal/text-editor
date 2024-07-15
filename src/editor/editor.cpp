@@ -139,39 +139,39 @@ void Editor::SetupPythonSyntaxHighlighting()
     SetLexer(wxSTC_LEX_PYTHON);
 
     SetKeyWords(0, "and as assert break class continue def del elif else except "
-                   "finally for from global if import in is lambda nonlocal not "
-                   "or pass raise return try while with yield");
+        "finally for from global if import in is lambda nonlocal not "
+        "or pass raise return try while with yield");
 
-    // VS Code-like colors
+    // Define colors that work well with both light and dark themes
+    wxColour keywordColor(0, 0, 255);       // Blue
+    wxColour commentColor(0, 128, 0);       // Green
+    wxColour stringColor(163, 21, 21);      // Dark Red
+    wxColour numberColor(128, 0, 128);      // Purple
+    wxColour operatorColor(64, 64, 64);     // Dark Gray
+    wxColour identifierColor(0, 0, 0);      // Black (will be adjusted for dark themes)
 
-    
-    StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
-    // StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
-
-    StyleSetForeground(wxSTC_P_DEFAULT, wxColour(255, 0, 0));
-    StyleSetForeground(wxSTC_P_COMMENTLINE, wxColour(113, 117, 113)); // Green
-    StyleSetForeground(wxSTC_P_NUMBER, wxColour(181, 206, 168));     // Light green
-    StyleSetForeground(wxSTC_P_STRING, wxColour(206, 145, 120));     // Light orange
-    StyleSetForeground(wxSTC_P_CHARACTER, wxColour(206, 145, 120));  // Light orange
-    StyleSetForeground(wxSTC_P_WORD, wxColour(86, 156, 214));        // Blue
+    // Set styles
+    StyleSetForeground(wxSTC_P_DEFAULT, identifierColor);
+    StyleSetForeground(wxSTC_P_COMMENTLINE, commentColor);
+    StyleSetForeground(wxSTC_P_NUMBER, numberColor);
+    StyleSetForeground(wxSTC_P_STRING, stringColor);
+    StyleSetForeground(wxSTC_P_CHARACTER, stringColor);
+    StyleSetForeground(wxSTC_P_WORD, keywordColor);
     StyleSetBold(wxSTC_P_WORD, true);
-    StyleSetForeground(wxSTC_P_TRIPLE, wxColour(206, 145, 120));       // Light orange
-    StyleSetForeground(wxSTC_P_TRIPLEDOUBLE, wxColour(206, 145, 120)); // Light orange
-    StyleSetForeground(wxSTC_P_CLASSNAME, wxColour(78, 201, 176));     // Teal
-    StyleSetForeground(wxSTC_P_DEFNAME, wxColour(220, 220, 170));      // Light yellow
+    StyleSetForeground(wxSTC_P_TRIPLE, stringColor);
+    StyleSetForeground(wxSTC_P_TRIPLEDOUBLE, stringColor);
+    StyleSetForeground(wxSTC_P_CLASSNAME, wxColour(0, 0, 128));  // Dark Blue
+    StyleSetForeground(wxSTC_P_DEFNAME, wxColour(128, 0, 0));    // Dark Red
     StyleSetBold(wxSTC_P_DEFNAME, true);
-    StyleSetForeground(wxSTC_P_OPERATOR, wxColour(128, 0,128));   // Light gray
-    StyleSetForeground(wxSTC_P_IDENTIFIER, wxColour(0,0,0)); // Light gray
+    StyleSetForeground(wxSTC_P_OPERATOR, operatorColor);
+    StyleSetForeground(wxSTC_P_IDENTIFIER, identifierColor);
 
     // Additional styles
-    StyleSetForeground(wxSTC_P_COMMENTBLOCK, wxColour(113, 117, 113)); // Green
-    StyleSetForeground(wxSTC_P_DECORATOR, wxColour(255, 215, 0));     // Gold
+    StyleSetForeground(wxSTC_P_COMMENTBLOCK, commentColor);
+    StyleSetForeground(wxSTC_P_DECORATOR, wxColour(255, 128, 0)); // Orange
 
     Colourise(0, -1);
     Refresh();
-    Update();
- 
-
 }
 
 void Editor::SetupCppSyntaxHighlighting()

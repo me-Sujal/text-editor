@@ -315,20 +315,22 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
 
 void MyFrame::SetCurrentLanguage()
 {
-    Editor *currentEditor = GetCurrentEditor();
+    Editor* currentEditor = GetCurrentEditor();
     int currentPage = m_notebook->GetSelection();
     if (currentPage != wxNOT_FOUND)
     {
         wxString pageTitle = m_notebook->GetPageText(currentPage);
         wxFileName fileName(pageTitle);
         wxString fileExtension = fileName.GetExt().Lower();
-        if(fileExtension == ""){
+        if (fileExtension == "") {
             m_currentLanguage->SetLabel("Language : Plain Text");
         }
         currentEditor->ApplySyntaxHighlighting(fileExtension);
         m_currentLanguage->SetLabel(wxString::Format("Language: %s", ConvertExtension(fileExtension)));
+
+        // Reapply the current theme to ensure proper color adjustments
+        ApplyTheme(availableThemes[m_currentThemeIndex]);
     }
-    
 }
 
 wxString MyFrame::ConvertExtension(wxString &fileExtension)
@@ -948,57 +950,44 @@ void MyFrame::OnChangeTheme(wxCommandEvent &event)
 
 void MyFrame::ApplyTheme(const Theme &theme)
 {
-    for (Editor *editor : m_editors)
+    for (Editor* editor : m_editors)
     {
-        // Set the main editor colors
-        editor->StyleSetBackground(wxSTC_STYLE_DEFAULT, theme.background);
-        wxLogDebug("m_isLexerApplied: %d", m_isLexerApplied);
-        wxLogDebug("Theme foreground color: %s", theme.foreground.GetAsString(wxC2S_HTML_SYNTAX));
-
-        if (!m_isLexerApplied)
+        for (int i = 0; i < wxSTC_STYLE_MAX; i++)
         {
-            editor->StyleSetForeground(wxSTC_STYLE_DEFAULT, theme.foreground);
+            editor->StyleSetBackground(i, theme.background);
         }
-        else
+
+        editor->StyleSetBackground(wxSTC_STYLE_DEFAULT, theme.background);
+        editor->StyleSetForeground(wxSTC_STYLE_DEFAULT, theme.foreground);
         editor->SetCaretForeground(theme.caretForeground);
         editor->SetSelBackground(true, theme.selectionBackground);
         editor->SetSelForeground(true, theme.selectionForeground);
 
-        // Set line number colors with higher contrast
-        wxColour lineNumBg = theme.lineNumberBackground;
-        wxColour lineNumFg = theme.lineNumberForeground;
-
-        // Ensure enough contrast
-        if (theme.name == "Dark" || theme.name == "Bluish Grey")
+        // Adjust syntax highlighting colors for dark themes
+        if (theme.background.GetLuminance() < 0.5)
         {
-            // lineNumBg = theme.background.ChangeLightness(110); // Slightly lighter than background
-            lineNumBg = wxColor(255, 0, 0);
-            lineNumFg = wxColour(200, 200, 200); // Light grey for better visibility
+            editor->StyleSetForeground(wxSTC_P_DEFAULT, wxColour(220, 220, 220));
+            editor->StyleSetForeground(wxSTC_P_COMMENTLINE, wxColour(108, 166, 108));
+            editor->StyleSetForeground(wxSTC_P_NUMBER, wxColour(181, 206, 168));
+            editor->StyleSetForeground(wxSTC_P_STRING, wxColour(206, 145, 120));
+            editor->StyleSetForeground(wxSTC_P_CHARACTER, wxColour(206, 145, 120));
+            editor->StyleSetForeground(wxSTC_P_WORD, wxColour(86, 156, 214));
+            editor->StyleSetForeground(wxSTC_P_TRIPLE, wxColour(206, 145, 120));
+            editor->StyleSetForeground(wxSTC_P_TRIPLEDOUBLE, wxColour(206, 145, 120));
+            editor->StyleSetForeground(wxSTC_P_CLASSNAME, wxColour(78, 201, 176));
+            editor->StyleSetForeground(wxSTC_P_DEFNAME, wxColour(220, 220, 170));
+            editor->StyleSetForeground(wxSTC_P_OPERATOR, wxColour(180, 180, 180));
+            editor->StyleSetForeground(wxSTC_P_IDENTIFIER, wxColour(220, 220, 220));
+            editor->StyleSetForeground(wxSTC_P_COMMENTBLOCK, wxColour(108, 166, 108));
+            editor->StyleSetForeground(wxSTC_P_DECORATOR, wxColour(255, 215, 0));
         }
 
+        // Set line number colors
         editor->StyleSetBackground(wxSTC_STYLE_LINENUMBER, theme.lineNumberBackground);
-        editor->StyleSetForeground(wxSTC_STYLE_LINENUMBER, lineNumFg);
+        editor->StyleSetForeground(wxSTC_STYLE_LINENUMBER, theme.lineNumberForeground);
 
-        // Ensure line numbers are visible
-        editor->SetMarginType(0, wxSTC_MARGIN_NUMBER);
-        editor->SetMarginWidth(0, 50); // Increase width to 50 pixels
-        editor->SetMarginSensitive(0, true);
-
-        // Add a separator
-        editor->SetMarginType(1, wxSTC_MARGIN_FORE);
-        editor->SetMarginWidth(1, 1);
-            editor->StyleSetForeground(1, lineNumFg);
-
-        // Increase line number font size and make bold
-        wxFont lineNumberFont = editor->StyleGetFont(wxSTC_STYLE_LINENUMBER);
-        lineNumberFont.SetPointSize(lineNumberFont.GetPointSize() + 2);
-        lineNumberFont.SetWeight(wxFONTWEIGHT_BOLD);
-        editor->StyleSetFont(wxSTC_STYLE_LINENUMBER, lineNumberFont);
-
-        // Apply the style to all text
-        editor->StyleClearAll();
-
-        // Refresh the editor to apply changes
+        // Refresh the editor
+        editor->Colourise(0, -1);
         editor->Refresh();
     }
     // Apply theme to the notebook (tab control)

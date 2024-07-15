@@ -38,6 +38,8 @@ private:
     void OnNewWindow(wxCommandEvent &event);
     void OnOpenFile(wxCommandEvent &event);
     void OnOpenFolder(wxCommandEvent &event);
+    void OnSave(wxCommandEvent &event);
+    void OnSaveAs(wxCommandEvent &event);
     void OnCut(wxCommandEvent &event);
     void OnCopy(wxCommandEvent &event);
     void OnPaste(wxCommandEvent &event);

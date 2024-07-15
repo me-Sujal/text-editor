@@ -271,7 +271,7 @@ void Editor::ApplySyntaxHighlighting(const wxString &fileType)
     {
         SetupPythonSyntaxHighlighting();
     }
-    else if (fileType == "cpp")
+    else if (fileType == "cpp" || fileType == "c" | fileType == "h")
     {
         SetupCppSyntaxHighlighting();
     }

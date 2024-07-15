@@ -136,8 +136,6 @@ void Editor::Redo()
 
 void Editor::SetupPythonSyntaxHighlighting()
 {
-    wxLogMessage("python highlighting");
-
     SetLexer(wxSTC_LEX_PYTHON);
 
     SetKeyWords(0, "and as assert break class continue def del elif else except "
@@ -146,11 +144,9 @@ void Editor::SetupPythonSyntaxHighlighting()
 
     // VS Code-like colors
 
-    wxLogMessage("hello");
-
-    StyleClearAll();
+    
     StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
-    StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
+    // StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
 
     StyleSetForeground(wxSTC_P_DEFAULT, wxColour(255, 0, 0));
     StyleSetForeground(wxSTC_P_COMMENTLINE, wxColour(113, 117, 113)); // Green
@@ -177,8 +173,6 @@ void Editor::SetupPythonSyntaxHighlighting()
  
 
 }
-
-
 
 void Editor::SetupCppSyntaxHighlighting()
 {
@@ -209,29 +203,11 @@ void Editor::SetupCppSyntaxHighlighting()
     StyleSetForeground(wxSTC_C_PREPROCESSOR, preprocessorColor);
     StyleSetForeground(wxSTC_C_OPERATOR, *wxBLACK);
     StyleSetForeground(wxSTC_C_IDENTIFIER, *wxBLACK);
+
+    Colourise(0, -1);
+    Refresh();
+    Update();
 }
-
-// void Editor::SetupJavaScriptSyntaxHighlighting()
-// {
-//     SetLexer(wxSTC_Lex
-
-//     SetKeyWords(0, "break case catch continue debugger default delete do else "
-//                    "finally for function if in instanceof new return switch "
-//                    "this throw try typeof var void while with class const let");
-
-//     const wxColor keywordColor(0, 0, 255);
-//     const wxColor stringColor(163, 21, 21);
-//     const wxColor commentColor(0, 128, 0);
-
-//     StyleSetForeground(wxSTC_JS_DEFAULT, *wxBLACK);
-//     StyleSetForeground(wxSTC_JS_COMMENT, commentColor);
-//     StyleSetForeground(wxSTC_JS_COMMENTLINE, commentColor);
-//     StyleSetForeground(wxSTC_JS_NUMBER, *wxBLUE);
-//     StyleSetForeground(wxSTC_JS_WORD, keywordColor);
-//     StyleSetBold(wxSTC_JS_WORD, true);
-//     StyleSetForeground(wxSTC_JS_STRING, stringColor);
-//     StyleSetForeground(wxSTC_JS_REGEX, wxColor(0, 128, 128));
-// }
 
 void Editor::SetupCssSyntaxHighlighting()
 {
@@ -251,6 +227,10 @@ void Editor::SetupCssSyntaxHighlighting()
     StyleSetForeground(wxSTC_CSS_ATTRIBUTE, propertyColor);
     StyleSetForeground(wxSTC_CSS_VALUE, valueColor);
     StyleSetForeground(wxSTC_CSS_COMMENT, wxColor(128, 128, 128));
+
+    Colourise(0, -1);
+    Refresh();
+    Update();
 }
 
 void Editor::SetupHtmlSyntaxHighlighting()
@@ -279,6 +259,10 @@ void Editor::SetupHtmlSyntaxHighlighting()
     StyleSetForeground(wxSTC_H_DOUBLESTRING, stringColor);
     StyleSetForeground(wxSTC_H_SINGLESTRING, stringColor);
     StyleSetForeground(wxSTC_H_COMMENT, wxColor(0, 128, 0));
+
+    Colourise(0, -1);
+    Refresh();
+    Update();
 }
 
 void Editor::ApplySyntaxHighlighting(const wxString &fileType)

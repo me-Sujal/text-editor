@@ -25,6 +25,8 @@ private:
     bool m_isWrapEnabled = false;
     bool m_isSidePanelShown = false;
     bool m_isSearchEnabled = false;
+    bool m_isLexerApplied = false;
+
     wxMenuItem *m_wrapMenuItem = nullptr;
     void CreateMenuBar();
     void CreateLayout();
@@ -59,7 +61,7 @@ private:
     void OnSearchCtrl(wxCommandEvent &event);
 
     int m_currentThemeIndex;
-    // void ApplyTheme(const Theme& theme);
+    void ApplyTheme(const Theme& theme);
     void OnChangeTheme(wxCommandEvent& event);
 
     WelcomePage* m_welcomePage;
@@ -77,6 +79,8 @@ private:
     void onCloseTabCleanup(wxCommandEvent &event);
     void onTimer(wxTimerEvent &event);
     void SetCurrentLanguage();
+    wxString ConvertExtension(wxString &fileExtension);
+
     wxString GetItemPath(wxTreeItemId itemId);
 
     wxTimer *m_timer;

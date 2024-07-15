@@ -91,5 +91,4 @@ std::vector<Theme> availableThemes = {
         wxColour(216, 222, 233),  // Light greyish-blue text for selection
         wxColour(236, 239, 244)   // Very light grey caret
     }
-    // Add more themes as needed
 };

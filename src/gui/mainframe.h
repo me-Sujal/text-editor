@@ -12,7 +12,7 @@
 #include <wx/fdrepdlg.h>
 
 #include <wx/srchctrl.h>
-#include <wx/gtk/srchctrl.h>
+
 
 
 class MyFrame : public wxFrame

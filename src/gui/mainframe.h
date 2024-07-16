@@ -12,6 +12,7 @@
 #include <wx/fdrepdlg.h>
 
 #include <wx/srchctrl.h>
+#include <wx/gtk/srchctrl.h>
 
 
 

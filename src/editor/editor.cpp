@@ -1,12 +1,14 @@
 
 #include "editor.h"
 #include <wx/wx.h>
+#include <wx/stc/stc.h>
 
 Editor::Editor(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style)
     : wxStyledTextCtrl(parent, id, pos, size, style)
 {
     SetupEditor();
     SetupStyles();
+    SetupBracketCompletion();
 }
 
 void Editor::SetupEditor()
@@ -284,4 +286,48 @@ void Editor::ApplySyntaxHighlighting(const wxString &fileType)
         SetupHtmlSyntaxHighlighting();
     }
     // Add more file types as needed
+}
+
+void Editor::SetupBracketCompletion(){
+    Bind(wxEVT_STC_CHARADDED, &Editor::OnCharAdded, this);
+}
+
+void Editor::OnCharAdded(wxStyledTextEvent &event)
+{
+    char ch = event.GetKey();
+    int currentPos = GetCurrentPos();
+
+    switch (ch)
+    {
+    case '(':
+        InsertText(currentPos, ")");
+        SetSelection(currentPos, currentPos);
+        break;
+    case '[':
+        InsertText(currentPos, "]");
+        SetSelection(currentPos, currentPos);
+        break;
+    case '{':
+        InsertText(currentPos, "}");
+        SetSelection(currentPos, currentPos);
+        break;
+    case '"':
+        // Only add closing quote if there isn't already one
+        if (GetCharAt(currentPos) != '"')
+        {
+            InsertText(currentPos, "\"");
+            SetSelection(currentPos, currentPos);
+        }
+        break;
+    case '\'':
+        // Only add closing quote if there isn't already one
+        if (GetCharAt(currentPos) != '\'')
+        {
+            InsertText(currentPos, "'");
+            SetSelection(currentPos, currentPos);
+        }
+        break;
+    }
+
+    event.Skip();
 }

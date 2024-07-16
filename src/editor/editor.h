@@ -25,6 +25,8 @@ public:
     void SetupHtmltaxHighlighting();
     void SetupCssSyntaxHighlighting();
     void SetupHtmlSyntaxHighlighting();
+    void SetupBracketCompletion();
+    void OnCharAdded(wxStyledTextEvent &event);
 
     void ApplySyntaxHighlighting(const wxString &fileType);
 

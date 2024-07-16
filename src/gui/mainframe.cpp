@@ -173,9 +173,11 @@ void MyFrame::CreateLayout()
     m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
     bottomSizer->Add(m_cursorPosition, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
     m_zoomButton = new wxButton(this, wxID_ANY, "Zoom: 0", wxDefaultPosition, wxSize(100, -1), wxBU_EXACTFIT);
-    bottomSizer->Add(m_zoomButton, 0, wxALIGN_CENTER_VERTICAL, 5);
+    bottomSizer->Add(m_zoomButton, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL);
     m_currentLanguage = new wxStaticText(this, wxID_ANY, " ");
-    bottomSizer->Add(m_currentLanguage, wxALIGN_CENTER_VERTICAL | wxCenter, 5);
+    bottomSizer->Add(m_currentLanguage, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+
+  
 
     m_subSizer = new wxBoxSizer(wxHORIZONTAL);
     m_subSizer->Add(sidePanel, 0, wxEXPAND);
@@ -191,7 +193,7 @@ void MyFrame::CreateLayout()
     m_timer->Start(100);
 
     // NEED TO ADD THIS TO THE SPLITTER AS WELL
-    m_searchCtrl = new wxSearchCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
+m_searchCtrl = new wxSearchCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
     m_searchCtrl->ShowSearchButton(true);
     m_searchCtrl->ShowCancelButton(true);
     // sidePanel->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);

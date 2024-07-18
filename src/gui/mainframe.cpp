@@ -162,8 +162,14 @@ void MyFrame::CreateLayout()
     m_searchPane1->SetMinSize(wxSize(200, -1));
     wxBoxSizer *searchSizer = new wxBoxSizer(wxVERTICAL);
 
-    wxButton *toggleButton = new wxButton(this, ID_ToggleButton, wxT("Toggle Side Panel"));
-    wxButton *showSearchButton = new wxButton(this, ID_ShowSearch, wxT("Show search"));
+    // wxBitmap zoomIcon("../src/icons/search.png", wxBITMAP_TYPE_PNG);
+    wxBitmapBundle searchIcon = wxBitmapBundle::FromSVGFile("../src/icons/search.svg", wxSize(28, 28));
+    wxBitmapBundle folderIcon = wxBitmapBundle::FromSVGFile("../src/icons/folderShow.svg", wxSize(28, 28));
+    wxBitmapBundle zoomIcon = wxBitmapBundle::FromSVGFile("../src/icons/zoomIcon.svg", wxSize(14, 14));
+
+    wxBitmapButton *toggleButton = new wxBitmapButton(this, ID_ToggleButton, folderIcon, wxDefaultPosition, wxSize(48, 48), wxBORDER_NONE);
+    wxBitmapButton *showSearchButton = new wxBitmapButton(this, ID_ShowSearch, searchIcon, wxDefaultPosition, wxSize(48, 48), wxBORDER_NONE);
+
     wxBoxSizer *sidePanel = new wxBoxSizer(wxVERTICAL);
 
     sidePanel->Add(toggleButton, 0, wxALL, 5);
@@ -172,12 +178,12 @@ void MyFrame::CreateLayout()
     wxBoxSizer *bottomSizer = new wxBoxSizer(wxHORIZONTAL);
     m_cursorPosition = new wxStaticText(this, wxID_ANY, "Line 0, Column 0");
     bottomSizer->Add(m_cursorPosition, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
-    m_zoomButton = new wxButton(this, wxID_ANY, "Zoom: 0", wxDefaultPosition, wxSize(100, -1), wxBU_EXACTFIT);
+    m_zoomButton = new wxButton(this, wxID_ANY, "Zoom: 0", wxDefaultPosition, wxSize(100, -1), wxBU_EXACTFIT | wxBORDER_NONE);
+    m_zoomButton->SetBitmap(zoomIcon);
+    m_zoomButton->SetBackgroundColour(wxColor(255, 100, 100));
     bottomSizer->Add(m_zoomButton, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL);
     m_currentLanguage = new wxStaticText(this, wxID_ANY, " ");
     bottomSizer->Add(m_currentLanguage, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
-
-  
 
     m_subSizer = new wxBoxSizer(wxHORIZONTAL);
     m_subSizer->Add(sidePanel, 0, wxEXPAND);
@@ -193,7 +199,7 @@ void MyFrame::CreateLayout()
     m_timer->Start(100);
 
     // NEED TO ADD THIS TO THE SPLITTER AS WELL
-m_searchCtrl = new wxSearchCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
+    m_searchCtrl = new wxSearchCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
     m_searchCtrl->ShowSearchButton(true);
     m_searchCtrl->ShowCancelButton(true);
     // sidePanel->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
@@ -317,18 +323,21 @@ wxString MyFrame::GetItemPath(wxTreeItemId itemId)
 
 void MyFrame::SetCurrentLanguage()
 {
-    Editor* currentEditor = GetCurrentEditor();
+    Editor *currentEditor = GetCurrentEditor();
     int currentPage = m_notebook->GetSelection();
     if (currentPage != wxNOT_FOUND)
     {
         wxString pageTitle = m_notebook->GetPageText(currentPage);
         wxFileName fileName(pageTitle);
         wxString fileExtension = fileName.GetExt().Lower();
-        if (fileExtension == "") {
-            m_currentLanguage->SetLabel("Language : Plain Text");
+        if (pageTitle == "Untitled")
+        {
+            m_currentLanguage->SetLabel("Plain Text");
         }
-        currentEditor->ApplySyntaxHighlighting(fileExtension);
-        m_currentLanguage->SetLabel(wxString::Format("Language: %s", ConvertExtension(fileExtension)));
+        else
+        {
+            m_currentLanguage->SetLabel(wxString::Format("%s", ConvertExtension(fileExtension)));
+        }
 
         // Reapply the current theme to ensure proper color adjustments
         ApplyTheme(availableThemes[m_currentThemeIndex]);
@@ -952,7 +961,7 @@ void MyFrame::OnChangeTheme(wxCommandEvent &event)
 
 void MyFrame::ApplyTheme(const Theme &theme)
 {
-    for (Editor* editor : m_editors)
+    for (Editor *editor : m_editors)
     {
         for (int i = 0; i < wxSTC_STYLE_MAX; i++)
         {

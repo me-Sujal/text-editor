@@ -12,7 +12,7 @@
 #include <wx/fdrepdlg.h>
 
 #include <wx/srchctrl.h>
-#include <wx/gtk/srchctrl.h>
+
 
 
 
@@ -73,6 +73,7 @@ private:
 
     void CreateTab(const wxString &filename = wxEmptyString);
     void onTabClose(wxAuiNotebookEvent &event);
+    void UpdateTitle(const wxString& filePath);
     void UpdateTitle();
     void UpdateTitle(int Count); // overloaded function
     void OnTabChange(wxAuiNotebookEvent &event);

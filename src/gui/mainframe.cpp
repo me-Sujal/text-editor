@@ -8,6 +8,10 @@
 #include <wx/filename.h>
 #include <unordered_map>
 
+#include <wx/filedlg.h>
+#include <wx/msgdlg.h>
+
+
 // Initialization and setup .........................
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
     : wxFrame(nullptr, wxID_ANY, "Code Lite", wxDefaultPosition, wxSize(800, 500)),
@@ -148,6 +152,10 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_FIND_NEXT, &MyFrame::OnFindDialogFind, this);
     Bind(wxEVT_FIND_REPLACE, &MyFrame::OnFindDialogReplace, this);
     Bind(wxEVT_FIND_REPLACE_ALL, &MyFrame::OnFindDialogReplaceAll, this);
+
+    //saveas
+    Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
+    Bind(wxEVT_MENU, &MyFrame::OnSaveAs, this, ID_SaveAs);
 }
 
 void MyFrame::CreateLayout()
@@ -1095,3 +1103,134 @@ MyFrame::~MyFrame()
         m_zoomPopup = nullptr;
     }
 }
+
+
+
+void MyFrame::OnSave(wxCommandEvent& event)
+{
+    Editor* currentEditor = GetCurrentEditor();
+    if (!currentEditor)
+        return;
+
+    if (m_currentFile.IsEmpty())
+    {
+        // If there's no current file, perform a Save As operation
+        OnSaveAs(event);
+    }
+    else
+    {
+        // Save the file
+        if (currentEditor->SaveFile(m_currentFile))
+        {
+            UpdateTitle();
+            currentEditor->SetModified(false);
+        }
+        else
+        {
+            wxMessageBox("Failed to save the file.", "Save Error", wxICON_ERROR | wxOK);
+        }
+    }
+}
+void MyFrame::OnSaveAs(wxCommandEvent& event)
+{
+    Editor* currentEditor = GetCurrentEditor();
+    if (!currentEditor)
+    {
+        wxMessageBox("No active editor found.", "Error", wxICON_ERROR | wxOK);
+        return;
+    }
+
+    wxString wildcard = "Text files (*.txt)|*.txt|"
+        "Java files (*.java)|*.java|"
+        "C++ files (*.cpp;*.cxx;*.cc)|*.cpp;*.cxx;*.cc|"
+        "C files (*.c;*.h)|*.c;*.h|"
+        "JavaScript files (*.js)|*.js|"
+        "Python files (*.py)|*.py|"
+        "C# files (*.cs)|*.cs|"
+        "All files (*.*)|*.*";
+
+    wxFileDialog saveFileDialog(this, "Save file", "", "",
+        wildcard,
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    // Try to set the default extension based on the current language
+    if (m_currentLanguage)
+    {
+        wxString currentLanguage = m_currentLanguage->GetLabel().Lower();
+        if (currentLanguage == "java")
+            saveFileDialog.SetFilterIndex(1);
+        else if (currentLanguage == "c++" || currentLanguage == "cpp")
+            saveFileDialog.SetFilterIndex(2);
+        else if (currentLanguage == "c")
+            saveFileDialog.SetFilterIndex(3);
+        else if (currentLanguage == "javascript" || currentLanguage == "js")
+            saveFileDialog.SetFilterIndex(4);
+        else if (currentLanguage == "python")
+            saveFileDialog.SetFilterIndex(5);
+        else if (currentLanguage == "c#" || currentLanguage == "csharp")
+            saveFileDialog.SetFilterIndex(6);
+    }
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    wxString filePath = saveFileDialog.GetPath();
+
+    // Ensure the file has an extension
+    wxFileName fileName(filePath);
+    if (!fileName.HasExt())
+    {
+        wxString ext;
+        switch (saveFileDialog.GetFilterIndex())
+        {
+        case 1: ext = "java"; break;
+        case 2: ext = "cpp"; break;
+        case 3: ext = "c"; break;
+        case 4: ext = "js"; break;
+        case 5: ext = "py"; break;
+        case 6: ext = "cs"; break;
+        default: ext = "txt";
+        }
+        fileName.SetExt(ext);
+        filePath = fileName.GetFullPath();
+    }
+
+    if (currentEditor->SaveFile(filePath))
+    {
+        m_currentFile = filePath;
+        UpdateTitle(m_currentFile);
+        currentEditor->SetModified(false);
+        SetCurrentLanguage(); // Update the language based on the new file extension
+    }
+    else
+    {
+        wxMessageBox("Failed to save the file.", "Save Error", wxICON_ERROR | wxOK);
+    }
+}
+
+void MyFrame::UpdateTitle(const wxString& filePath)
+{
+    wxString title;
+    if (filePath.IsEmpty())
+    {
+        title = "Untitled - Codelite";
+    }
+    else
+    {
+        wxFileName fileName(filePath);
+        title = fileName.GetFullName() + " - Codelite";
+    }
+    SetTitle(title);
+
+    // Update the tab title if using a notebook
+    if (m_notebook)
+    {
+        int currentPage = m_notebook->GetSelection();
+        if (currentPage != wxNOT_FOUND)
+        {
+            wxString tabTitle = filePath.IsEmpty() ? "Untitled" : wxFileName(filePath).GetFullName();
+            m_notebook->SetPageText(currentPage, tabTitle);
+        }
+    }
+}
+

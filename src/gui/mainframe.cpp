@@ -542,7 +542,7 @@ void MyFrame::OnZoomButtonClick(wxCommandEvent &event)
                                     {
             if (zoom >= -8 && zoom <= 8)
             { 
-                currentEditor->SetZoom(zoom*5);
+                currentEditor->SetZoom(zoom*1.25);
                 UpdateZoom(zoom); 
             } });
     }

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Main document body -->
+  <path d="M20 10 L60 10 L80 30 L80 90 L20 90 Z" fill="none" stroke="#7a7880" stroke-width="4"/>
+  
+  <!-- Folded corner -->
+  <path d="M60 10 L60 30 L80 30" fill="none" stroke="#7a7880" stroke-width="4"/>
+  
+  <!-- Text lines -->
+  <line x1="30" y1="45" x2="70" y2="45" stroke="#7a7880" stroke-width="3"/>
+  <line x1="30" y1="55" x2="70" y2="55" stroke="#7a7880" stroke-width="3"/>
+  <line x1="30" y1="65" x2="70" y2="65" stroke="#7a7880" stroke-width="3"/>
+  
+  <!-- Filled circle -->
+  <!-- <circle cx="75" cy="75" r="18" fill="#7a7880"/> -->
+  <circle cx="75" cy="75" r="18" fill="#fc0303"/>
+  
+  <!-- Cross (white) -->
+  <path d="M68 68 L82 82 M82 68 L68 82" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+</svg>

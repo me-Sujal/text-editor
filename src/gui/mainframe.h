@@ -83,6 +83,7 @@ private:
     void onCloseTabCleanup(wxCommandEvent &event);
     void onTimer(wxTimerEvent &event);
     void SetCurrentLanguage();
+    void SaveFile();
     wxString ConvertExtension(wxString &fileExtension);
 
     wxString GetItemPath(wxTreeItemId itemId);
@@ -99,6 +100,7 @@ private:
     wxString m_currentFile;
     wxStaticText *m_cursorPosition;
     wxStaticText *m_currentLanguage;
+    wxStaticBitmap *m_saveStatus;
 
     wxButton *m_zoomButton;
     void OnZoomButtonClick(wxCommandEvent &event);
@@ -109,6 +111,7 @@ private:
     wxFindReplaceData m_findReplaceData;
     wxSearchCtrl *m_searchCtrl;
     wxTextCtrl *m_replaceCtrl;
+    bool isFileSaved = false;
 };
 
 // Menu item IDs

@@ -11,6 +11,7 @@
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
 
+#include <wx/statbmp.h>
 
 // Initialization and setup .........................
 MyFrame::MyFrame(const wxString &filepath, const wxString &initialContent)
@@ -153,7 +154,7 @@ void MyFrame::BindEventHandlers()
     Bind(wxEVT_FIND_REPLACE, &MyFrame::OnFindDialogReplace, this);
     Bind(wxEVT_FIND_REPLACE_ALL, &MyFrame::OnFindDialogReplaceAll, this);
 
-    //saveas
+    // saveas
     Bind(wxEVT_MENU, &MyFrame::OnSave, this, ID_Save);
     Bind(wxEVT_MENU, &MyFrame::OnSaveAs, this, ID_SaveAs);
 }
@@ -170,10 +171,12 @@ void MyFrame::CreateLayout()
     m_searchPane1->SetMinSize(wxSize(200, -1));
     wxBoxSizer *searchSizer = new wxBoxSizer(wxVERTICAL);
 
-    // wxBitmap zoomIcon("../src/icons/search.png", wxBITMAP_TYPE_PNG);
     wxBitmapBundle searchIcon = wxBitmapBundle::FromSVGFile("../src/icons/search.svg", wxSize(28, 28));
     wxBitmapBundle folderIcon = wxBitmapBundle::FromSVGFile("../src/icons/folderShow.svg", wxSize(28, 28));
     wxBitmapBundle zoomIcon = wxBitmapBundle::FromSVGFile("../src/icons/zoomIcon.svg", wxSize(14, 14));
+    wxBitmapBundle replaceIcon = wxBitmapBundle::FromSVGFile("../src/icons/replace.svg", wxSize(28, 28));
+    wxBitmapBundle savedIcon = wxBitmapBundle::FromSVGFile("../src/icons/savedFile.svg", wxSize(28, 28));
+    wxBitmapBundle unsavedIcon = wxBitmapBundle::FromSVGFile("../src/icons/unsavedFile.svg", wxSize(14, 14));
 
     wxBitmapButton *toggleButton = new wxBitmapButton(this, ID_ToggleButton, folderIcon, wxDefaultPosition, wxSize(48, 48), wxBORDER_NONE);
     wxBitmapButton *showSearchButton = new wxBitmapButton(this, ID_ShowSearch, searchIcon, wxDefaultPosition, wxSize(48, 48), wxBORDER_NONE);
@@ -190,6 +193,9 @@ void MyFrame::CreateLayout()
     m_zoomButton->SetBitmap(zoomIcon);
     m_zoomButton->SetBackgroundColour(wxColor(255, 100, 100));
     bottomSizer->Add(m_zoomButton, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL);
+    // m_saveStatus = new wxStaticText(this, wxID_ANY, " ");
+    m_saveStatus = new wxStaticBitmap(this, wxID_ANY, wxNullBitmap);
+    bottomSizer->Add(m_saveStatus, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
     m_currentLanguage = new wxStaticText(this, wxID_ANY, " ");
     bottomSizer->Add(m_currentLanguage, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 
@@ -210,12 +216,11 @@ void MyFrame::CreateLayout()
     m_searchCtrl = new wxSearchCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(200, -1), wxTE_PROCESS_ENTER);
     m_searchCtrl->ShowSearchButton(true);
     m_searchCtrl->ShowCancelButton(true);
-    // sidePanel->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
     searchSizer->Add(m_searchCtrl, 0, wxEXPAND | wxALL, 5);
 
     wxBoxSizer *replaceSizer = new wxBoxSizer(wxHORIZONTAL);
     m_replaceCtrl = new wxTextCtrl(m_searchPane1, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(150, -1));
-    wxButton *replaceButton = new wxButton(m_searchPane1, wxID_ANY, "Replace", wxDefaultPosition, wxSize(50, -1));
+    wxBitmapButton *replaceButton = new wxBitmapButton(m_searchPane1, wxID_ANY, replaceIcon, wxDefaultPosition, wxSize(48, 48), wxBORDER_NONE);
     replaceSizer->Add(m_replaceCtrl, 1, wxEXPAND | wxRIGHT, 5);
     replaceSizer->Add(replaceButton, 0, wxEXPAND);
     // sidePanel->Add(replaceSizer, 0, wxEXPAND | wxALL, 5);
@@ -422,22 +427,129 @@ void MyFrame::CreateTab(const wxString &filename)
     UpdateTitle();
 }
 
+// void MyFrame::onTabClose(wxAuiNotebookEvent &event)
+// {
+//     Editor *currentEditor = GetCurrentEditor();
+//     int index = event.GetSelection();
+
+//     // wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+//     int tabCount = m_notebook->GetPageCount();
+
+//     if (isFileSaved) {
+//         wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+//         if (tabCount == 1) // This is the last tab
+//         {
+//             ShowWelcomePage();
+//             event.Veto(); // Prevent the last tab from closing
+//         }
+//         else
+//         {
+//             UpdateTitle(tabCount - 1);
+//             event.Skip();
+//         }
+//     }
+//     else
+//     {
+//         // File is unsaved, show dialog
+//         wxString message = wxString::Format("Do you want to save changes to %s?", m_notebook->GetPageText(index));
+//         wxMessageDialog dialog(this, message, "Save Changes", wxYES_NO | wxCANCEL | wxICON_QUESTION);
+//         dialog.SetYesNoLabels("Save", "Don't Save");
+
+//         switch (dialog.ShowModal())
+//         {
+//         case wxID_YES:
+//             // Save the file
+//             if (currentEditor->SaveFile(m_currentFile))
+//             {
+//                 wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+//                 event.Skip();
+//             }
+//             else
+//             {
+//                 wxMessageBox("Failed to save the file.", "Save Error", wxICON_ERROR | wxOK);
+//                 event.Veto();
+//             }
+//             break;
+
+//         case wxID_NO:
+//             // Don't save, just close
+//             wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+//             event.Skip();
+//             break;
+
+//         case wxID_CANCEL:
+//             // Cancel closing
+//             event.Veto();
+//             break;
+//         }
+//     }
+//     }
+
 void MyFrame::onTabClose(wxAuiNotebookEvent &event)
 {
     int index = event.GetSelection();
+    Editor *currentEditor = static_cast<Editor *>(m_notebook->GetPage(index));
 
-    wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
-    int tabCount = m_notebook->GetPageCount();
-
-    if (tabCount == 1) // This is the last tab
+    if (!currentEditor->IsModified())
     {
-        ShowWelcomePage();
-        event.Veto(); // Prevent the last tab from closing
+        // File is saved, proceed with closing
+        wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+        int tabCount = m_notebook->GetPageCount();
+
+        if (tabCount == 1) // This is the last tab
+        {
+            ShowWelcomePage();
+            event.Veto(); // Prevent the last tab from closing
+        }
+        else
+        {
+            UpdateTitle(tabCount - 1);
+            event.Skip();
+        }
     }
     else
     {
-        UpdateTitle(tabCount - 1);
-        event.Skip();
+        // File is unsaved, show dialog
+        wxString message = wxString::Format("Do you want to save changes to %s?", m_notebook->GetPageText(index));
+        wxMessageDialog dialog(this, message, "Save Changes", wxYES_NO | wxCANCEL | wxICON_QUESTION);
+        dialog.SetYesNoLabels("Save", "Don't Save");
+
+        switch (dialog.ShowModal())
+        {
+        case wxID_YES:
+            // Save the file
+
+            if (m_currentFile.IsEmpty())
+            {
+                // If there's no current file, perform a Save As operation
+                OnSaveAs(event);
+            }
+            else
+            {
+                if (currentEditor->SaveFile(m_currentFile))
+                {
+                    wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+                    event.Skip();
+                }
+                else
+                {
+                    wxMessageBox("Failed to save the file.", "Save Error", wxICON_ERROR | wxOK);
+                    event.Veto();
+                }
+                break;
+
+            case wxID_NO:
+                // Don't save, just close
+                wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
+                event.Skip();
+                break;
+
+            case wxID_CANCEL:
+                // Cancel closing
+                event.Veto();
+                break;
+            }
+        }
     }
 }
 
@@ -468,11 +580,12 @@ void MyFrame::OnTabChange(wxAuiNotebookEvent &event)
 
 void MyFrame::UpdateTitle()
 {
+    wxString saveStatus = !isFileSaved ? " " : "* ";
     int currentPage = m_notebook->GetSelection();
     if (currentPage != wxNOT_FOUND)
     {
         wxString title = m_notebook->GetPageText(currentPage);
-        SetTitle(title + " - CodeLite ");
+        SetTitle(saveStatus + title + " - CodeLite ");
     }
     else
     {
@@ -488,11 +601,41 @@ void MyFrame::UpdateTitle(int count)
     }
 }
 
+void MyFrame::UpdateTitle(const wxString &filePath)
+{
+
+    wxString title;
+    if (filePath.IsEmpty())
+    {
+        title = "Untitled - Codelite";
+    }
+    else
+    {
+        wxFileName fileName(filePath);
+        title = fileName.GetFullName() + " - Codelite";
+    }
+    SetTitle(title);
+
+    // Update the tab title if using a notebook
+    if (m_notebook)
+    {
+        int currentPage = m_notebook->GetSelection();
+        if (currentPage != wxNOT_FOUND)
+        {
+            wxString tabTitle = filePath.IsEmpty() ? "Untitled" : wxFileName(filePath).GetFullName();
+            m_notebook->SetPageText(currentPage, tabTitle);
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////
+
 // UI and Layout Management
 
 void MyFrame ::onTimer(wxTimerEvent &event)
 {
+    wxBitmapBundle savedIcon = wxBitmapBundle::FromSVGFile("../src/icons/savedFile.svg", wxSize(28, 28));
+    wxBitmapBundle unsavedIcon = wxBitmapBundle::FromSVGFile("../src/icons/unsavedFile.svg", wxSize(28, 28));
     Editor *currentEditor = GetCurrentEditor();
     if (currentEditor)
     {
@@ -502,7 +645,18 @@ void MyFrame ::onTimer(wxTimerEvent &event)
 
         wxString cursor = wxString::Format("Line %d , Column %d", lineNum + 1, col + 1);
         m_cursorPosition->SetLabel(cursor);
-        // SetStatusText(cursor);
+
+        // wxString savestatus = currentEditor->IsModified() ? "Unsaved changes" : "No changes";
+        if (currentEditor->IsModified())
+        {
+            m_saveStatus->SetBitmap(unsavedIcon);
+        }
+        else
+        {
+            m_saveStatus->SetBitmap(savedIcon);
+        }
+        isFileSaved = currentEditor->IsModified();
+        UpdateTitle();
     }
 }
 
@@ -1104,11 +1258,9 @@ MyFrame::~MyFrame()
     }
 }
 
-
-
-void MyFrame::OnSave(wxCommandEvent& event)
+void MyFrame::OnSave(wxCommandEvent &event)
 {
-    Editor* currentEditor = GetCurrentEditor();
+    Editor *currentEditor = GetCurrentEditor();
     if (!currentEditor)
         return;
 
@@ -1130,10 +1282,12 @@ void MyFrame::OnSave(wxCommandEvent& event)
             wxMessageBox("Failed to save the file.", "Save Error", wxICON_ERROR | wxOK);
         }
     }
+    isFileSaved = true;
+    UpdateTitle();
 }
-void MyFrame::OnSaveAs(wxCommandEvent& event)
+void MyFrame::OnSaveAs(wxCommandEvent &event)
 {
-    Editor* currentEditor = GetCurrentEditor();
+    Editor *currentEditor = GetCurrentEditor();
     if (!currentEditor)
     {
         wxMessageBox("No active editor found.", "Error", wxICON_ERROR | wxOK);
@@ -1141,17 +1295,17 @@ void MyFrame::OnSaveAs(wxCommandEvent& event)
     }
 
     wxString wildcard = "Text files (*.txt)|*.txt|"
-        "Java files (*.java)|*.java|"
-        "C++ files (*.cpp;*.cxx;*.cc)|*.cpp;*.cxx;*.cc|"
-        "C files (*.c;*.h)|*.c;*.h|"
-        "JavaScript files (*.js)|*.js|"
-        "Python files (*.py)|*.py|"
-        "C# files (*.cs)|*.cs|"
-        "All files (*.*)|*.*";
+                        "Java files (*.java)|*.java|"
+                        "C++ files (*.cpp;*.cxx;*.cc)|*.cpp;*.cxx;*.cc|"
+                        "C files (*.c;*.h)|*.c;*.h|"
+                        "JavaScript files (*.js)|*.js|"
+                        "Python files (*.py)|*.py|"
+                        "C# files (*.cs)|*.cs|"
+                        "All files (*.*)|*.*";
 
     wxFileDialog saveFileDialog(this, "Save file", "", "",
-        wildcard,
-        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+                                wildcard,
+                                wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     // Try to set the default extension based on the current language
     if (m_currentLanguage)
@@ -1183,13 +1337,26 @@ void MyFrame::OnSaveAs(wxCommandEvent& event)
         wxString ext;
         switch (saveFileDialog.GetFilterIndex())
         {
-        case 1: ext = "java"; break;
-        case 2: ext = "cpp"; break;
-        case 3: ext = "c"; break;
-        case 4: ext = "js"; break;
-        case 5: ext = "py"; break;
-        case 6: ext = "cs"; break;
-        default: ext = "txt";
+        case 1:
+            ext = "java";
+            break;
+        case 2:
+            ext = "cpp";
+            break;
+        case 3:
+            ext = "c";
+            break;
+        case 4:
+            ext = "js";
+            break;
+        case 5:
+            ext = "py";
+            break;
+        case 6:
+            ext = "cs";
+            break;
+        default:
+            ext = "txt";
         }
         fileName.SetExt(ext);
         filePath = fileName.GetFullPath();
@@ -1207,30 +1374,3 @@ void MyFrame::OnSaveAs(wxCommandEvent& event)
         wxMessageBox("Failed to save the file.", "Save Error", wxICON_ERROR | wxOK);
     }
 }
-
-void MyFrame::UpdateTitle(const wxString& filePath)
-{
-    wxString title;
-    if (filePath.IsEmpty())
-    {
-        title = "Untitled - Codelite";
-    }
-    else
-    {
-        wxFileName fileName(filePath);
-        title = fileName.GetFullName() + " - Codelite";
-    }
-    SetTitle(title);
-
-    // Update the tab title if using a notebook
-    if (m_notebook)
-    {
-        int currentPage = m_notebook->GetSelection();
-        if (currentPage != wxNOT_FOUND)
-        {
-            wxString tabTitle = filePath.IsEmpty() ? "Untitled" : wxFileName(filePath).GetFullName();
-            m_notebook->SetPageText(currentPage, tabTitle);
-        }
-    }
-}
-

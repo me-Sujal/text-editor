@@ -43,13 +43,13 @@ void ZoomPopup::UpdateZoomLabel()
 
 void ZoomPopup::OnZoomIn(wxCommandEvent &event)
 {
-    m_currentZoom > 8 ? m_currentZoom++ : 8 ;
+    m_currentZoom < 8 ? m_currentZoom++ : 8 ;
     UpdateZoomLabel();
 }
 
 void ZoomPopup::OnZoomOut(wxCommandEvent &event)
 {
-    m_currentZoom < -2 ? m_currentZoom-- : -2 ;
+    m_currentZoom > -2 ? m_currentZoom-- : -2 ;
     UpdateZoomLabel();
 }
 

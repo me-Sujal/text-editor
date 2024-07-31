@@ -427,63 +427,6 @@ void MyFrame::CreateTab(const wxString &filename)
     UpdateTitle();
 }
 
-// void MyFrame::onTabClose(wxAuiNotebookEvent &event)
-// {
-//     Editor *currentEditor = GetCurrentEditor();
-//     int index = event.GetSelection();
-
-//     // wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
-//     int tabCount = m_notebook->GetPageCount();
-
-//     if (isFileSaved) {
-//         wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
-//         if (tabCount == 1) // This is the last tab
-//         {
-//             ShowWelcomePage();
-//             event.Veto(); // Prevent the last tab from closing
-//         }
-//         else
-//         {
-//             UpdateTitle(tabCount - 1);
-//             event.Skip();
-//         }
-//     }
-//     else
-//     {
-//         // File is unsaved, show dialog
-//         wxString message = wxString::Format("Do you want to save changes to %s?", m_notebook->GetPageText(index));
-//         wxMessageDialog dialog(this, message, "Save Changes", wxYES_NO | wxCANCEL | wxICON_QUESTION);
-//         dialog.SetYesNoLabels("Save", "Don't Save");
-
-//         switch (dialog.ShowModal())
-//         {
-//         case wxID_YES:
-//             // Save the file
-//             if (currentEditor->SaveFile(m_currentFile))
-//             {
-//                 wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
-//                 event.Skip();
-//             }
-//             else
-//             {
-//                 wxMessageBox("Failed to save the file.", "Save Error", wxICON_ERROR | wxOK);
-//                 event.Veto();
-//             }
-//             break;
-
-//         case wxID_NO:
-//             // Don't save, just close
-//             wxQueueEvent(this, new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED, ID_CLOSE_TAB_CLEANUP));
-//             event.Skip();
-//             break;
-
-//         case wxID_CANCEL:
-//             // Cancel closing
-//             event.Veto();
-//             break;
-//         }
-//     }
-//     }
 
 void MyFrame::onTabClose(wxAuiNotebookEvent &event)
 {

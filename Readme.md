@@ -15,7 +15,8 @@ A basic text editor created using C++ and wxWidgets with scintilla based editor 
 # 📋 Requirement
 
 - C++ compiler
-- [wxWidgets library](www.wxwidgets.org)
+- [wxWidgets library](https://www.wxwidgets.org/)
+
 
 # 🚀 Building and running
 

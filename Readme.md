@@ -2,13 +2,13 @@
 A basic text editor created using C++ and wxWidgets with scintilla based editor interface
 
 # 🛠️ Features
-📃 Create, Open and Save files of any language
-🔍 Quick Search, find and replace keywords
-🖌️ Multi-theme support
-📂 Directory Display in tree structure
-📑 Multi-Tab support
-📋 Cut, Paste, Copy support
-🖌️ Syntax highlighting for string, numbers and comment for selective languages
+📃 Create, Open and Save files of any language  
+🔍 Quick Search, find and replace keywords  
+🖌️ Multi-theme support  
+📂 Directory Display in tree structure  
+📑 Multi-Tab support  
+📋 Cut, Paste, Copy support  
+🖌️ Syntax highlighting for string, numbers and comment for selective languages  
 
 # 📋 Requirement 
 - C++ compiler 

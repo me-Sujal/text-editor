@@ -1,3 +1,5 @@
+// defination of application class
+
 #pragma once
 #include <wx/wx.h>
 

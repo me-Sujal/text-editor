@@ -1,3 +1,4 @@
+// Creation of editor as well as implementation of the editor related functions
 
 #include "editor.h"
 #include <wx/wx.h>

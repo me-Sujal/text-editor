@@ -1,6 +1,9 @@
+// For the actual application Creation
+//  Contains defination for the window frame, functions for gui part of application as well as connecting all the compinents
+
 #pragma once
 #include "../Themes/themes.h"
-#include"../Welcome/welcome_page.h"
+#include "../Welcome/welcome_page.h"
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
@@ -11,16 +14,14 @@
 #include "../popups/popups.h"
 #include <wx/fdrepdlg.h>
 
-#include <wx/srchctrl.h>
+#include <wx/srchctrl.h> // for windows system 
+#include <wx/gtk/srchctrl.h> // for linux system
 
-
-
-
-class MyFrame : public wxFrame
+class GuiFrame : public wxFrame
 {
 public:
-    MyFrame(const wxString &filepath, const wxString &initialContent);
-    ~MyFrame();
+    GuiFrame(const wxString &filepath, const wxString &initialContent);
+    ~GuiFrame();
 
 private:
     bool m_isWrapEnabled = false;
@@ -49,6 +50,7 @@ private:
     void OnRedo(wxCommandEvent &event);
 
     void onDocumentation(wxCommandEvent &event);
+    void onAbout(wxCommandEvent &event);
 
     void CreateFindReplaceDialog();
     void OnFind(wxCommandEvent &event);
@@ -64,16 +66,17 @@ private:
     void OnSearchCtrl(wxCommandEvent &event);
 
     int m_currentThemeIndex;
-    void ApplyTheme(const Theme& theme);
-    void OnChangeTheme(wxCommandEvent& event);
+    void ApplyTheme(const Theme &theme);
+    void OnChangeTheme(wxCommandEvent &event);
 
-    WelcomePage* m_welcomePage;
+    WelcomePage *m_welcomePage;
     void ShowWelcomePage();
     void HideWelcomePage();
 
     void CreateTab(const wxString &filename = wxEmptyString);
+    void CreateUntitledTab();
     void onTabClose(wxAuiNotebookEvent &event);
-    void UpdateTitle(const wxString& filePath);
+    void UpdateTitle(const wxString &filePath);
     void UpdateTitle();
     void UpdateTitle(int Count); // overloaded function
     void OnTabChange(wxAuiNotebookEvent &event);

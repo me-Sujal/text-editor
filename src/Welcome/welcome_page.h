@@ -1,3 +1,5 @@
+// defination for the welcomepage class
+
 #pragma once
 #include <wx/wx.h>
 #include <wx/stattext.h>

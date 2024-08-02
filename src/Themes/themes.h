@@ -1,3 +1,5 @@
+// for the theme style sets
+
 #pragma once
 #include <wx/colour.h>
 #include <string>

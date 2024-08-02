@@ -1,3 +1,5 @@
+// Definations for the editor setup and editor related functions
+
 #pragma once
 
 #include <wx/stc/stc.h>

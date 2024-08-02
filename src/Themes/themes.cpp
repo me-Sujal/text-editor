@@ -1,3 +1,5 @@
+// defination for the theme styles 
+
 #include "themes.h"
 
 std::vector<Theme> availableThemes = {

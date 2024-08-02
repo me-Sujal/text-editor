@@ -1,3 +1,5 @@
+// Generat a welcome page for the application
+
 #include "welcome_page.h"
 #include"../gui/mainframe.h"
 #include <wx/sizer.h>

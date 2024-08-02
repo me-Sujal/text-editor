@@ -1,4 +1,5 @@
-// popups.cpp
+// Definations for custom popup windows 
+
 #include "popups.h"
 ZoomPopup::ZoomPopup(wxWindow *parent, wxWindow *button, std::function<void(int)> updateZoomCallback)
     : wxPopupWindow(parent), m_updateZoomCallback(updateZoomCallback), m_currentZoom(0), m_button(button), m_shown(false)

@@ -1,3 +1,5 @@
+// Implementation of the file handling functions 
+
 #include "file_utils.h"
 #include <wx/file.h>
 #include <wx/filename.h>

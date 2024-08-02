@@ -1,3 +1,5 @@
+// defination of the file handling and manipulation fucntions
+
 #pragma once
 
 #include <wx/wx.h>

@@ -1,4 +1,5 @@
-// popups.h
+// Creating custom Popup windows as required after defination in popups.h file
+
 #pragma once
 
 #include <wx/wx.h>

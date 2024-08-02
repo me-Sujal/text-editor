@@ -51,7 +51,7 @@ use proper include file according to your system in file : src/mainframe.h, line
 1. Launch application
 
 ```bash
-    cd /path-to-cloned-directory/build/
+    cd /path-to-cloned-directory/build
     ./TextEditor
 ```
 

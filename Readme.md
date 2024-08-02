@@ -55,7 +55,7 @@ use proper include file according to your system in file : src/mainframe.h, line
     ./TextEditor
 ```
 
-Alternatively the application can be launched by clicking .exe file in the build directory
+*Alternatively the application can be launched by clicking .exe file in the build directory*
 
 2. Some Keyboard shortcuts
 

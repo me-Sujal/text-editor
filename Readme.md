@@ -14,7 +14,7 @@ A basic text editor created using C++ and wxWidgets with scintilla based editor 
 - C++ compiler 
 - wxWidgets library
 
-# 🚀 Building a🖱️nd running
+# 🚀 Building and running
 1. Clone the Repo
 ```Bash
     git clone https://github.com/me-Sujal/text-editor
